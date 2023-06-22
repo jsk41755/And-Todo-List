@@ -18,7 +18,7 @@ object RetrofitClient {
         }
 
         val gson = GsonBuilder()
-            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            .setDateFormat("yyyy-MM-dd'T'HH:mm:ssX")
             .create()
 
         Retrofit.Builder()

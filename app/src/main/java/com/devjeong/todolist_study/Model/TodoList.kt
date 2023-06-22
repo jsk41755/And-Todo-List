@@ -2,7 +2,11 @@ package com.devjeong.todolist_study.Model
 
 data class TodoResponse(
     val data: List<TodoItem>,
-    val meta: Meta,
+    val message: String
+)
+
+data class TodoSearchResponse(
+    val data: TodoItem,
     val message: String
 )
 
