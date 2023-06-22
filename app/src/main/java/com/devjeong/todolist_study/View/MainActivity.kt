@@ -57,8 +57,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
 
         binding.CompleteBtn.setOnClickListener {
             hideCompleted = !hideCompleted
-
-            Log.d("check", "check")
             fetchTodoItems()
         }
 

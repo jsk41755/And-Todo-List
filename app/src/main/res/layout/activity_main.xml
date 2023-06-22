@@ -33,14 +33,7 @@
             android:layout_height="match_parent"
             android:layout_marginTop="10dp">
 
-            <Button
-                android:id="@+id/CompleteBtn"
-                android:text="완료 숨기기"
-                android:textColor="#3478F6"
-                android:background="#00ff0000"
-                android:layout_gravity="right"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
+
 
             <ImageButton
                 android:id="@+id/addBtn"
@@ -62,9 +55,16 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:layout_marginStart="18dp"/>
-
             </ScrollView>
 
+            <Button
+                android:id="@+id/CompleteBtn"
+                android:text="완료 숨기기"
+                android:textColor="#3478F6"
+                android:background="#00ff0000"
+                android:layout_gravity="right"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
         </FrameLayout>
 
     </LinearLayout>
