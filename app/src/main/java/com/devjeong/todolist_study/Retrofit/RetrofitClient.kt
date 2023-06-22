@@ -3,8 +3,10 @@ package com.devjeong.todolist_study.Retrofit
 import com.devjeong.todolist_study.BuildConfig
 import com.google.gson.GsonBuilder
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
@@ -20,6 +22,12 @@ object RetrofitClient {
         val gson = GsonBuilder()
             .setDateFormat("yyyy-MM-dd'T'HH:mm:ssX")
             .create()
+
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
+        httpClient.addInterceptor(loggingInterceptor)
 
         Retrofit.Builder()
             .baseUrl(BASE_URL)

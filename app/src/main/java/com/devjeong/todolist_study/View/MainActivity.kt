@@ -12,12 +12,14 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.devjeong.todolist_study.Adapter.TodoItemAdapter
 import com.devjeong.todolist_study.BaseActivity
 import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.R
+import com.devjeong.todolist_study.SwipeHelperCallback
 import com.devjeong.todolist_study.ViewModel.TodoListViewModel
 import com.devjeong.todolist_study.ViewModel.TodoViewModel
 import com.devjeong.todolist_study.databinding.ActivityMainBinding
@@ -30,12 +32,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
     private lateinit var searchView: SearchView
     private lateinit var containerLayout: LinearLayout
 
+    private lateinit var groupedAdapters: MutableList<TodoItemAdapter> // 그룹별 TodoItemAdapter 저장 리스트
+
     private var hideCompleted = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        adapter = TodoItemAdapter(emptyList())
+        adapter = TodoItemAdapter(mutableListOf()) { adapter, position ->
+            deleteTodoItem(adapter, position)
+        }
+        groupedAdapters = mutableListOf() // 그룹별 TodoItemAdapter 리스트 초기화
+
         todoViewModel = ViewModelProvider(this)[TodoListViewModel::class.java]
         searchViewModel = ViewModelProvider(this)[TodoViewModel::class.java]
         searchView = binding.searchView
@@ -77,11 +85,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
 
         for (group in groupedItems) {
             val date = group.key
-            val items = group.value
+            val items = group.value.toMutableList()
 
             val recyclerView = RecyclerView(this)
             recyclerView.layoutManager = LinearLayoutManager(this)
-            recyclerView.adapter = TodoItemAdapter(items)
+            //recyclerView.adapter = TodoItemAdapter(items)
+
+            // 새로운 TodoItemAdapter 생성
+            val groupAdapter = TodoItemAdapter(items) { adapter, position ->
+                deleteTodoItem(adapter, position)
+            }
+            recyclerView.adapter = groupAdapter
+            groupedAdapters.add(groupAdapter) // 그룹별 TodoItemAdapter 리스트에 추가
 
             val dateTextView = TextView(this)
             dateTextView.text = date
@@ -90,17 +105,27 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
 
             containerLayout.addView(dateTextView)
             containerLayout.addView(recyclerView)
+
+            // 스와이프 동작을 감지하는 ItemTouchHelper 등록
+            val itemTouchHelper = ItemTouchHelper(SwipeHelperCallback(groupAdapter))
+            itemTouchHelper.attachToRecyclerView(recyclerView)
         }
     }
 
     private fun observeTodoSearchItem(todoItem: TodoItem) {
-        containerLayout.removeAllViews() // 기존의 RecyclerView 삭제
+        containerLayout.removeAllViews()
 
         val changedUpdatedAt = todoItem.updated_at.replace("-", ".").substring(0, 10)
 
         val recyclerView = RecyclerView(this)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = TodoItemAdapter(listOf(todoItem))
+
+        val items = mutableListOf(todoItem) // 검색 결과 아이템을 리스트에 추가
+
+        val adapter = TodoItemAdapter(items) { adapter, position ->
+            deleteTodoItem(adapter, position)
+        }
+        recyclerView.adapter = adapter
 
         val dateTextView = TextView(this)
         dateTextView.text = changedUpdatedAt
@@ -110,6 +135,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
         containerLayout.addView(dateTextView)
         containerLayout.addView(recyclerView)
     }
+
+
 
 
     private fun fetchTodoItems() {
@@ -132,7 +159,23 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
         } else{
             Toast.makeText(this, "입력을 해주세요!!", Toast.LENGTH_SHORT).show()
         }
-
-
     }
+
+    private fun deleteTodoItem(groupAdapter: TodoItemAdapter, position: Int) {
+        val adapterPosition = calculateAdapterPosition(groupAdapter, position)
+        adapterPosition?.let {
+            groupAdapter.deleteItem(it)
+        }
+    }
+    private fun calculateAdapterPosition(groupAdapter: TodoItemAdapter, position: Int): Int? {
+        var adapterPosition = position
+        for (adapter in groupedAdapters) {
+            if (adapter === groupAdapter) {
+                return adapterPosition
+            }
+            adapterPosition += adapter.itemCount
+        }
+        return null
+    }
+
 }

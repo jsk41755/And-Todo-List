@@ -3,4 +3,5 @@
     <string name="todo_content">Lorem ipsum dolor sit amet, consectetur adipiscing elit</string>
     <string name="todo_time">12:42 PM</string>
     <string name="submit">추가하기</string>
+    <string name="scroll">리사이클러뷰 스크롤</string>
 </resources>

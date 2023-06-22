@@ -17,6 +17,9 @@ class TodoListViewModel : ViewModel() {
     private val _todoItems = MutableLiveData<List<TodoItem>>()
     val todoItems: LiveData<List<TodoItem>> get() = _todoItems
 
+    private val _deleteResult = MutableLiveData<Boolean>()
+    val deleteResult: LiveData<Boolean> get() = _deleteResult
+
     fun fetchTodoItems() {
         viewModelScope.launch {
             try {
@@ -36,6 +39,26 @@ class TodoListViewModel : ViewModel() {
                 }
             } catch (e: IOException) {
                 Log.e("TodoViewModel", "API 호출 실패: ${e.message}")
+            }
+        }
+    }
+    fun deleteTodoItem(todoId: Int) {
+        viewModelScope.launch {
+            try {
+                val retrofit = RetrofitClient.createService(ApiService::class.java)
+                val response = withContext(Dispatchers.IO) {
+                    retrofit.deleteTodoItem(todoId).execute()
+                }
+
+                if (response.isSuccessful) {
+                    _deleteResult.value = true
+                } else {
+                    _deleteResult.value = false
+                    Log.d("TodoViewModel", "삭제 실패")
+                }
+            } catch (e: IOException) {
+                _deleteResult.value = false
+                Log.e("TodoViewModel", "삭제 실패: ${e.message}")
             }
         }
     }
