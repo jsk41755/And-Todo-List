@@ -19,7 +19,7 @@ import java.time.format.DateTimeFormatter
 
 class TodoItemAdapter(
     private val todoList: MutableList<TodoItem>,
-    private val deleteItemCallback: (adapter: TodoItemAdapter, position: Int) -> Unit
+    private val deleteItemCallback: (todoItem: TodoItem) -> Unit
 ) : RecyclerView.Adapter<TodoItemAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -36,14 +36,19 @@ class TodoItemAdapter(
         return todoList.size
     }
 
-    fun deleteItem(position: Int) {
-        if (position in 0 until todoList.size) {
-            todoList.removeAt(position)
-            notifyItemRemoved(position)
-            // 삭제한 이후의 아이템들의 인덱스 조정
-            notifyItemRangeChanged(position, todoList.size - position)
+    fun getTodoItemAt(position: Int): Int? {
+        return if (position in 0 until todoList.size) {
+            todoList[position].id
+        } else {
+            null
         }
     }
+    fun deleteItem(position: Int) {
+        val deletedItem = todoList.removeAt(position)
+        deleteItemCallback(deletedItem)
+        notifyItemRemoved(position)
+    }
+
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val titleTextView: TextView = itemView.findViewById(R.id.TodoSaveContentTxt)
         private val isDoneCheckBox: CheckBox = itemView.findViewById(R.id.TodoIsDone)

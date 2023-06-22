@@ -42,15 +42,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
+            <ImageButton
                 android:id="@+id/addBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|bottom"
                 android:src="@drawable/floating_button"
-                android:tint="@null"
-                android:layout_marginBottom="15dp"
-                android:layout_marginEnd="15dp"
+                android:background="#00ff0000"
                 android:contentDescription="@string/submit" />
 
             <ScrollView

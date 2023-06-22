@@ -19,7 +19,6 @@ class TodoListViewModel : ViewModel() {
 
     private val _deleteResult = MutableLiveData<Boolean>()
     val deleteResult: LiveData<Boolean> get() = _deleteResult
-
     fun fetchTodoItems() {
         viewModelScope.launch {
             try {
@@ -49,9 +48,9 @@ class TodoListViewModel : ViewModel() {
                 val response = withContext(Dispatchers.IO) {
                     retrofit.deleteTodoItem(todoId).execute()
                 }
-
                 if (response.isSuccessful) {
                     _deleteResult.value = true
+                    Log.d("TodoViewModel", "삭제 성공")
                 } else {
                     _deleteResult.value = false
                     Log.d("TodoViewModel", "삭제 실패")
@@ -62,5 +61,6 @@ class TodoListViewModel : ViewModel() {
             }
         }
     }
+
 }
 
