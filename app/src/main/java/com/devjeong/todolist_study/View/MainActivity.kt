@@ -17,6 +17,7 @@ import com.devjeong.todolist_study.Adapter.TodoItemAdapter
 import com.devjeong.todolist_study.BaseActivity
 import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.SwipeHelperCallback
+import com.devjeong.todolist_study.TodoListItemHelper
 import com.devjeong.todolist_study.ViewModel.TodoListViewModel
 import com.devjeong.todolist_study.ViewModel.TodoViewModel
 import com.devjeong.todolist_study.databinding.ActivityMainBinding
@@ -114,6 +115,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
             recyclerView.adapter = groupAdapter
             groupedAdapters.add(groupAdapter)
 
+
             val dateTextView = TextView(this)
             dateTextView.text = date
             dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
@@ -122,8 +124,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
             containerLayout.addView(dateTextView)
             containerLayout.addView(recyclerView)
 
-            val itemTouchHelper = ItemTouchHelper(SwipeHelperCallback(groupAdapter))
-            itemTouchHelper.attachToRecyclerView(recyclerView)
+            /*val itemTouchHelper = ItemTouchHelper(SwipeHelperCallback(groupAdapter))
+            itemTouchHelper.attachToRecyclerView(recyclerView)*/
+
+            // 리사이클러뷰에 스와이프, 드래그 기능 달기
+            val swipeHelperCallback = TodoListItemHelper(groupAdapter).apply {
+                // 스와이프한 뒤 고정시킬 위치 지정
+                setClamp(resources.displayMetrics.widthPixels.toFloat() / 4)    // 1080 / 4 = 270
+            }
+            ItemTouchHelper(swipeHelperCallback).attachToRecyclerView(recyclerView)
         }
     }
 

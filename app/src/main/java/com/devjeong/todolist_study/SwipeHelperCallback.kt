@@ -12,17 +12,17 @@ import com.devjeong.todolist_study.Adapter.TodoItemAdapter
 class SwipeHelperCallback(private val adapter: TodoItemAdapter) :
     ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
 
+    private val deleteButtonWidth: Int = 200 // 삭제 버튼의 가로 길이 (임의로 설정)
     override fun onMove(
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder,
         target: RecyclerView.ViewHolder
     ): Boolean {
-        return false
-    }
+        return false    }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        val position = viewHolder.adapterPosition
-        adapter.deleteItem(position)
+        /*val position = viewHolder.adapterPosition
+        adapter.deleteItem(position)*/
     }
 
     override fun onChildDraw(
@@ -48,12 +48,10 @@ class SwipeHelperCallback(private val adapter: TodoItemAdapter) :
             val iconRight = itemView.left + iconMargin + deleteIcon.intrinsicWidth
             deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
 
-            background.setBounds(
-                itemView.left,
-                itemView.top,
-                itemView.left + dX.toInt(),
-                itemView.bottom
-            )
+            // Swipe 거리에 따라 삭제 버튼을 일부분만 보이도록 함
+            val backgroundRight = itemView.left + dX.toInt()
+            val backgroundLeft = backgroundRight - deleteButtonWidth
+            background.setBounds(backgroundLeft, itemView.top, backgroundRight, itemView.bottom)
         }
 
         background.draw(c)
