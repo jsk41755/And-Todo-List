@@ -60,7 +60,7 @@ class TodoItemAdapter(
 
             removeTxt.setOnClickListener {
                 removeData(this.layoutPosition)
-                //Toast.makeText(this, "삭제완료!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(itemView.context, "삭제완료!", Toast.LENGTH_SHORT).show()
             }
 
             isDoneCheckBox.setOnCheckedChangeListener(null)

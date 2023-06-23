@@ -40,16 +40,6 @@
             android:layout_marginTop="10dp">
 
 
-
-            <ImageButton
-                android:id="@+id/addBtn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end|bottom"
-                android:src="@drawable/floating_button"
-                android:background="#00ff0000"
-                android:contentDescription="@string/submit" />
-
             <ScrollView
                 android:contentDescription="@string/scroll"
                 android:layout_width="match_parent"
@@ -71,6 +61,15 @@
                 android:layout_gravity="right"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
+
+            <ImageButton
+                android:id="@+id/addBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|bottom"
+                android:src="@drawable/floating_button"
+                android:background="#00ff0000"
+                android:contentDescription="@string/submit" />
         </FrameLayout>
 
     </LinearLayout>

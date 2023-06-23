@@ -16,7 +16,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.devjeong.todolist_study.Adapter.TodoItemAdapter
 import com.devjeong.todolist_study.BaseActivity
 import com.devjeong.todolist_study.Model.TodoItem
-import com.devjeong.todolist_study.SwipeHelperCallback
 import com.devjeong.todolist_study.TodoListItemHelper
 import com.devjeong.todolist_study.ViewModel.TodoListViewModel
 import com.devjeong.todolist_study.ViewModel.TodoViewModel
@@ -115,6 +114,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
             recyclerView.adapter = groupAdapter
             groupedAdapters.add(groupAdapter)
 
+            recyclerView.isNestedScrollingEnabled = false
 
             val dateTextView = TextView(this)
             dateTextView.text = date
@@ -124,8 +124,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
             containerLayout.addView(dateTextView)
             containerLayout.addView(recyclerView)
 
-            /*val itemTouchHelper = ItemTouchHelper(SwipeHelperCallback(groupAdapter))
-            itemTouchHelper.attachToRecyclerView(recyclerView)*/
 
             // 리사이클러뷰에 스와이프, 드래그 기능 달기
             val swipeHelperCallback = TodoListItemHelper(groupAdapter).apply {
@@ -133,6 +131,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
                 setClamp(resources.displayMetrics.widthPixels.toFloat() / 4)    // 1080 / 4 = 270
             }
             ItemTouchHelper(swipeHelperCallback).attachToRecyclerView(recyclerView)
+
+            recyclerView.setOnTouchListener { _, _ ->
+                swipeHelperCallback.removePreviousClamp(recyclerView)
+                false
+            }
         }
     }
 

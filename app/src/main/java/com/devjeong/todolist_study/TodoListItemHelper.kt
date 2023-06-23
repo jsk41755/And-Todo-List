@@ -1,17 +1,12 @@
 package com.devjeong.todolist_study
 
-import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.view.View
-import androidx.coordinatorlayout.widget.CoordinatorLayout.Behavior.getTag
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.devjeong.todolist_study.Adapter.TodoItemAdapter
+import kotlin.math.max
 import kotlin.math.min
 
 class TodoListItemHelper(private val adapter: TodoItemAdapter):
@@ -26,7 +21,14 @@ class TodoListItemHelper(private val adapter: TodoItemAdapter):
         recyclerView: RecyclerView,
         viewHolder: RecyclerView.ViewHolder
     ): Int {
-        return makeMovementFlags(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT)
+        return makeMovementFlags(0, ItemTouchHelper.LEFT)
+    }
+
+    override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
+        viewHolder?.let {
+            currentPosition = viewHolder.adapterPosition
+            getDefaultUIUtil().onSelected(getView(it))
+        }
     }
 
     override fun onMove(
@@ -64,19 +66,14 @@ class TodoListItemHelper(private val adapter: TodoItemAdapter):
         if (actionState == ACTION_STATE_SWIPE) {
             val view = getView(viewHolder)
             val isClamped = getTag(viewHolder)
-            val newX = clampViewPositionHorizontal(dX, isClamped, isCurrentlyActive)  // newX 만큼 이동(고정 시 이동 위치/고정 해제 시 이동 위치 결정
+            val x =  clampViewPositionHorizontal(view, dX, isClamped, isCurrentlyActive)
 
-            if(newX == -clamp){
-                getView(viewHolder).animate().translationX(-clamp).setDuration(100L).start()
-                return
-            }
-
-            currentDx = newX
+            currentDx = x
             getDefaultUIUtil().onDraw(
                 c,
                 recyclerView,
                 view,
-                newX,
+                x,
                 dY,
                 actionState,
                 isCurrentlyActive
@@ -86,30 +83,34 @@ class TodoListItemHelper(private val adapter: TodoItemAdapter):
 
     override fun getSwipeEscapeVelocity(defaultValue: Float): Float = defaultValue * 10
 
+    override fun getSwipeThreshold(viewHolder: RecyclerView.ViewHolder): Float {
+        val isClamped = getTag(viewHolder)
+        setTag(viewHolder, !isClamped && currentDx <= -clamp)
+        return 2f
+    }
+
     // swipe_view 반환 -> swipe_view만 이동할 수 있게 해줌
     private fun getView(viewHolder: RecyclerView.ViewHolder) : View = viewHolder.itemView.findViewById(R.id.swipe_view)
 
     private fun clampViewPositionHorizontal(
+        view: View,
         dX: Float,
         isClamped: Boolean,
         isCurrentlyActive: Boolean
-    ): Float {
-        //Right 방향으로 swipe 막기
-        val max = 0f
+    ) : Float {
+        // View의 가로 길이의 절반까지만 swipe 되도록
+        val min: Float = -view.width.toFloat()/3
+        // RIGHT 방향으로 swipe 막기
+        val max: Float = 0f
 
-        val newX = if (isClamped) {
-            // 현재 swipe 중이면 swipe되는 영역 제한
-            if(isCurrentlyActive)
-                //  오른쪽 swipe일 때
-                if(dX < 0) dX/3 - clamp
-                //왼쪽 swipe일 때
-                else dX - clamp
-            //swipe 중이 아니면 고정시키
-            else -clamp
+        val x = if (isClamped) {
+            // View가 고정되었을 때 swipe되는 영역 제한
+            if (isCurrentlyActive) dX - clamp else -clamp
+        } else {
+            dX
         }
-        else dX / 2
 
-        return min(newX, max)
+        return min(max(min, x), max)
     }
 
     // isClamped를 view의 tag로 관리
@@ -117,7 +118,10 @@ class TodoListItemHelper(private val adapter: TodoItemAdapter):
     private fun setTag(viewHolder: RecyclerView.ViewHolder, isClamped: Boolean) {
         viewHolder.itemView.tag = isClamped
     }
-    private fun getTag(viewHolder: ViewHolder) : Boolean = viewHolder.itemView.tag as? Boolean ?: false
+    private fun getTag(viewHolder: RecyclerView.ViewHolder) : Boolean {
+        // isClamped를 view의 tag로 관리
+        return viewHolder.itemView.tag as? Boolean ?: false
+    }
 
     fun setClamp(clamp: Float) { this.clamp = clamp }
 
@@ -132,7 +136,7 @@ class TodoListItemHelper(private val adapter: TodoItemAdapter):
             setTag(viewHolder, false)
             previousPosition = null
         }
-
     }
+
 
 }
