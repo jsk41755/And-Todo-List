@@ -13,7 +13,7 @@ data class TodoSearchResponse(
 data class TodoItem(
     val id: Int,
     val title: String,
-    val is_done: Boolean,
+    var is_done: Boolean,
     val created_at: String,
     val updated_at: String
 )

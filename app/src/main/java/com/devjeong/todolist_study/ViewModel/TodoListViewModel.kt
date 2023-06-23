@@ -62,5 +62,28 @@ class TodoListViewModel : ViewModel() {
         }
     }
 
+    fun updateTodoItem(todoItem: TodoItem) {
+        viewModelScope.launch {
+            try {
+                val retrofit = RetrofitClient.createService(ApiService::class.java)
+                val response = withContext(Dispatchers.IO) {
+                    retrofit.updateTodoItem(todoItem.id, todoItem.title, todoItem.is_done)
+                        .execute()
+                }
+
+                if (response.isSuccessful) {
+                    val updatedTodoItem = response.body()
+                    if (updatedTodoItem != null) {
+                        // 업데이트된 아이템 처리
+                        // 필요한 로직을 추가해주세요
+                    }
+                } else {
+                    Log.d("TodoViewModel", "API 호출 실패")
+                }
+            } catch (e: IOException) {
+                Log.e("TodoViewModel", "API 호출 실패: ${e.message}")
+            }
+        }
+    }
 }
 

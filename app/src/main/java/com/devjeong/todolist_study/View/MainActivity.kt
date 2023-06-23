@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.devjeong.todolist_study.Adapter.TodoItemAdapter
 import com.devjeong.todolist_study.BaseActivity
 import com.devjeong.todolist_study.Model.TodoItem
@@ -26,6 +27,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
     private lateinit var adapter: TodoItemAdapter
     private lateinit var searchView: SearchView
     private lateinit var containerLayout: LinearLayout
+    private lateinit var refreshLayout: SwipeRefreshLayout
 
     private lateinit var groupedAdapters: MutableList<TodoItemAdapter> // 그룹별 TodoItemAdapter 저장 리스트
 
@@ -34,15 +36,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        adapter = TodoItemAdapter(mutableListOf()) { todoItem ->
+        adapter = TodoItemAdapter(mutableListOf(), deleteItemCallback = { todoItem ->
             deleteTodoItem(todoItem)
-        }
+        }, updateItemCallback = { todoItem ->
+            updateTodoItem(todoItem)
+        })
         groupedAdapters = mutableListOf() // 그룹별 TodoItemAdapter 리스트 초기화
 
         todoViewModel = ViewModelProvider(this)[TodoListViewModel::class.java]
         searchViewModel = ViewModelProvider(this)[TodoViewModel::class.java]
         searchView = binding.searchView
         containerLayout = binding.containerLayout
+        refreshLayout = binding.refreshLayout
 
         todoViewModel.deleteResult.observe(this) { result ->
             if (result) {
@@ -55,6 +60,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
 
         fetchTodoItems()
 
+        refreshLayout.setDistanceToTriggerSync(400)
+        refreshLayout.setOnRefreshListener {
+            refreshLayout.isRefreshing = false
+            fetchTodoItems()
+        }
+
         binding.CompleteBtn.setOnClickListener {
             hideCompleted = !hideCompleted
             fetchTodoItems()
@@ -62,8 +73,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
 
         searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                val itemId = query?.trim()
-                fetchTodoSearchItems(itemId)
+                val title = query?.trim()
+                fetchTodoSearchItems(title)
                 return true
             }
 
@@ -94,9 +105,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
             val recyclerView = RecyclerView(this)
             recyclerView.layoutManager = LinearLayoutManager(this)
 
-            val groupAdapter = TodoItemAdapter(items) { todoItem ->
+            val groupAdapter = TodoItemAdapter(items, deleteItemCallback = { todoItem ->
                 deleteTodoItem(todoItem)
-            }
+            }, updateItemCallback = { todoItem ->
+                updateTodoItem(todoItem)
+            })
+
             recyclerView.adapter = groupAdapter
             groupedAdapters.add(groupAdapter)
 
@@ -113,29 +127,35 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
         }
     }
 
-    private fun observeTodoSearchItem(todoItem: TodoItem) {
+    private fun observeTodoSearchItem(todoItems: List<TodoItem>) {
         containerLayout.removeAllViews()
 
-        val changedUpdatedAt = todoItem.updated_at.replace("-", ".").substring(0, 10)
+        for (todoItem in todoItems) {
+            val changedUpdatedAt = todoItem.updated_at.replace("-", ".").substring(0, 10)
 
-        val recyclerView = RecyclerView(this)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+            val recyclerView = RecyclerView(this)
+            recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val items = mutableListOf(todoItem) // 검색 결과 아이템을 리스트에 추가
+            val items = mutableListOf(todoItem) // 검색 결과 아이템을 리스트에 추가
 
-        val adapter = TodoItemAdapter(items) { todoItem ->
-            deleteTodoItem(todoItem)
+            val adapter = TodoItemAdapter(items, deleteItemCallback = { item ->
+                deleteTodoItem(item)
+            }, updateItemCallback = { item ->
+                updateTodoItem(item)
+            })
+
+            recyclerView.adapter = adapter
+
+            val dateTextView = TextView(this)
+            dateTextView.text = changedUpdatedAt
+            dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
+            dateTextView.setTypeface(null, Typeface.BOLD)
+
+            containerLayout.addView(dateTextView)
+            containerLayout.addView(recyclerView)
         }
-        recyclerView.adapter = adapter
-
-        val dateTextView = TextView(this)
-        dateTextView.text = changedUpdatedAt
-        dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
-        dateTextView.setTypeface(null, Typeface.BOLD)
-
-        containerLayout.addView(dateTextView)
-        containerLayout.addView(recyclerView)
     }
+
     private fun fetchTodoItems() {
         todoViewModel.fetchTodoItems()
         todoViewModel.todoItems.observe(this) { todoItems ->
@@ -143,11 +163,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
         }
     }
 
-    private fun fetchTodoSearchItems(itemId: String? = null) {
-        if (itemId?.isNotEmpty() == true) {
-            searchViewModel.fetchTodoSearchItem(itemId)
-            searchViewModel.todoItem.observe(this) { todoItem ->
-                observeTodoSearchItem(todoItem)
+    private fun fetchTodoSearchItems(query: String? = null) {
+        if (query?.isNotEmpty() == true) {
+            searchViewModel.fetchTodoSearchItem(query)
+            searchViewModel.todoItem.observe(this) { todoItems ->
+                observeTodoSearchItem(todoItems)
             }
             searchViewModel.toastMessage.observe(this) { message ->
                 Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
@@ -158,5 +178,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
     }
     private fun deleteTodoItem(todoItem: TodoItem) {
         todoViewModel.deleteTodoItem(todoItem.id)
+    }
+
+    private fun updateTodoItem(item: TodoItem) {
+        todoViewModel.updateTodoItem(item)
     }
 }

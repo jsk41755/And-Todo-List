@@ -15,28 +15,25 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class TodoViewModel : ViewModel() {
-    private val _todoItem = MutableLiveData<TodoItem>()
-    val todoItem: LiveData<TodoItem> get() = _todoItem
+    private val _todoItem = MutableLiveData<List<TodoItem>>()
+    val todoItem: LiveData<List<TodoItem>> get() = _todoItem
 
     private val _toastMessage = MutableLiveData<String>()
     val toastMessage: LiveData<String> get() = _toastMessage
 
-    fun fetchTodoSearchItem(itemId: String) {
+    fun fetchTodoSearchItem(query: String) {
         viewModelScope.launch {
             try {
                 val retrofit = RetrofitClient.createService(ApiService::class.java)
                 val response = withContext(Dispatchers.IO) {
-                    retrofit.getTodoItem(itemId).execute()
+                    retrofit.getTodoItem(query ?: "").execute()
                 }
-                Log.d("TodoViewModel", response.toString())
 
                 if (response.isSuccessful) {
                     val todoResponse = response.body()
                     if (todoResponse != null) {
-                        val todoItem = todoResponse.data
-                        _todoItem.value = todoItem
-                    } else if (response.code() == 204){
-                        _toastMessage.value = "API 응답에 데이터가 없습니다."
+                        val todoItems = todoResponse.data
+                        _todoItem.value = todoItems
                     }
                 } else {
                     Log.d("TodoViewModel", "API 호출 실패")

@@ -63,4 +63,6 @@ dependencies {
 
     //viewModel lifecycle
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0'
+    //SwipeRefreshLayout
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
 }

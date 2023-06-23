@@ -19,7 +19,8 @@ import java.time.format.DateTimeFormatter
 
 class TodoItemAdapter(
     private val todoList: MutableList<TodoItem>,
-    private val deleteItemCallback: (todoItem: TodoItem) -> Unit
+    private val deleteItemCallback: (todoItem: TodoItem) -> Unit,
+    private val updateItemCallback: (todoItem: TodoItem) -> Unit
 ) : RecyclerView.Adapter<TodoItemAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -64,6 +65,12 @@ class TodoItemAdapter(
             val outputFormatter = DateTimeFormatter.ofPattern("hh:mm a")
             val formattedDateTime = parsedDateTime.format(outputFormatter)
             createdAtTextView.text = formattedDateTime
+
+            isDoneCheckBox.setOnCheckedChangeListener(null)
+            isDoneCheckBox.setOnCheckedChangeListener { buttonView, isChecked ->
+                todoItem.is_done = isChecked
+                updateItemCallback(todoItem)
+            }
         }
 
         init {
