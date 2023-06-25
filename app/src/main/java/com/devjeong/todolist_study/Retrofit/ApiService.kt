@@ -1,18 +1,21 @@
 package com.devjeong.todolist_study.Retrofit
 
 import com.devjeong.todolist_study.Model.TodoItem
+import com.devjeong.todolist_study.Model.TodoItemDTO
 import com.devjeong.todolist_study.Model.TodoResponse
 import com.devjeong.todolist_study.Model.TodoSearchResponse
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
-import retrofit2.http.Url
 
 interface ApiService {
     @GET("todos")
@@ -45,5 +48,10 @@ interface ApiService {
         @Field("title") title: String,
         @Field("is_done") isDone: Boolean
     ): Call<TodoItem>
+
+    @POST("todos")
+    suspend fun addTodo(
+        @Body todoItemDTO: TodoItemDTO
+    ): Response<ResponseBody>
 }
 

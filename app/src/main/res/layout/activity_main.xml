@@ -52,6 +52,7 @@
             <Button
                 android:id="@+id/CompleteBtn"
                 android:text="완료 숨기기"
+                android:textStyle="bold"
                 android:textColor="#3478F6"
                 android:background="#00ff0000"
                 android:layout_gravity="right"
@@ -59,7 +60,7 @@
                 android:layout_height="wrap_content"/>
 
             <ImageButton
-                android:id="@+id/addBtn"
+                android:id="@+id/addDialogBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end|bottom"

@@ -4,6 +4,7 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.SearchView
@@ -18,6 +19,8 @@ import com.devjeong.todolist_study.Adapter.TodoItemAdapter
 import com.devjeong.todolist_study.BaseActivity
 import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.TodoListItemHelper
+import com.devjeong.todolist_study.View.CustomDialog.CustomDialog
+import com.devjeong.todolist_study.View.CustomDialog.CustomDialogInterface
 import com.devjeong.todolist_study.ViewModel.TodoListViewModel
 import com.devjeong.todolist_study.ViewModel.TodoViewModel
 import com.devjeong.todolist_study.databinding.ActivityMainBinding
@@ -30,6 +33,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
     private lateinit var containerLayout: LinearLayout
     private lateinit var refreshLayout: SwipeRefreshLayout
     private lateinit var scrollView: ScrollView
+    private lateinit var addBtn : ImageButton
 
     private lateinit var groupedAdapters: MutableList<TodoItemAdapter> // 그룹별 TodoItemAdapter 저장 리스트
 
@@ -78,6 +82,18 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
             refreshLayout.isRefreshing = false
             fetchTodoItems()
         }*/
+
+        binding.addDialogBtn.setOnClickListener {
+            val customDialog = CustomDialog(this@MainActivity, object : CustomDialogInterface {
+                override fun onAddButtonClicked() {
+                    // Add 버튼이 클릭되었을 때의 동작 처리
+                    currentPage = 1
+                    fetchTodoItems()
+                }
+            })
+
+            customDialog.show()
+        }
 
         binding.CompleteBtn.setOnClickListener {
             hideCompleted = !hideCompleted

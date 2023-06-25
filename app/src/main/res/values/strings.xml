@@ -4,4 +4,6 @@
     <string name="todo_time">12:42 PM</string>
     <string name="submit">추가하기</string>
     <string name="scroll">리사이클러뷰 스크롤</string>
+    <string name="todo">할일</string>
+    <string name="warning">If you disable today, the task will be considered as tomorrow</string>
 </resources>

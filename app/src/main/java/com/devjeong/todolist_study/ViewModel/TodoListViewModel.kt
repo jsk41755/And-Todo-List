@@ -6,11 +6,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devjeong.todolist_study.Model.TodoItem
+import com.devjeong.todolist_study.Model.TodoItemDTO
 import com.devjeong.todolist_study.Retrofit.ApiService
 import com.devjeong.todolist_study.Retrofit.RetrofitClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.ResponseBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.IOException
 
 class TodoListViewModel : ViewModel() {
@@ -65,6 +70,25 @@ class TodoListViewModel : ViewModel() {
         }
     }
 
+    fun addTodoItem(todoItem: TodoItemDTO) {
+        viewModelScope.launch {
+            try {
+                val todoItemDTO = TodoItemDTO(todoItem.title, todoItem.is_done)
+                val retrofit = RetrofitClient.createService(ApiService::class.java)
+                val response = retrofit.addTodo(todoItemDTO)
+
+                if (response.isSuccessful) {
+                    Log.d("TodoViewModel", "API 호출 성공")
+                } else {
+                    Log.d("TodoViewModel", "API 호출 실패")
+                }
+            } catch (e: IOException) {
+                Log.e("TodoViewModel", "API 호출 실패: ${e.message}")
+            }
+        }
+    }
+
+
     fun updateTodoItem(todoItem: TodoItem) {
         viewModelScope.launch {
             try {
@@ -77,8 +101,8 @@ class TodoListViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     val updatedTodoItem = response.body()
                     if (updatedTodoItem != null) {
-                        // 업데이트된 아이템 처리
-                        // 필요한 로직을 추가해주세요
+
+
                     }
                 } else {
                     Log.d("TodoViewModel", "API 호출 실패")
