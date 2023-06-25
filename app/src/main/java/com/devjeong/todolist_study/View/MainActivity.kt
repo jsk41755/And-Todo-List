@@ -29,11 +29,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
     private lateinit var todoViewModel: TodoListViewModel
     private lateinit var searchViewModel: TodoViewModel
     private lateinit var adapter: TodoItemAdapter
-    private lateinit var searchView: SearchView
     private lateinit var containerLayout: LinearLayout
-    private lateinit var refreshLayout: SwipeRefreshLayout
     private lateinit var scrollView: ScrollView
-    private lateinit var addBtn : ImageButton
 
     private lateinit var groupedAdapters: MutableList<TodoItemAdapter> // 그룹별 TodoItemAdapter 저장 리스트
 
@@ -60,7 +57,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
 
         todoViewModel = ViewModelProvider(this)[TodoListViewModel::class.java]
         searchViewModel = ViewModelProvider(this)[TodoViewModel::class.java]
-        searchView = binding.searchView
         containerLayout = binding.containerLayout
         //refreshLayout = binding.refreshLayout
         scrollView = binding.scrollView
@@ -100,7 +96,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
             fetchTodoItems()
         }
 
-        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 val title = query?.trim()
                 fetchTodoSearchItems(title)
@@ -159,7 +155,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
         }
 
         val groupedItems = filteredItems.groupBy {
-            it.updated_at.substring(0, 10) // updated_at 값을 기준으로 그룹화
+            it.updated_at.replace("-", ".").substring(0, 10) // updated_at 값을 기준으로 그룹화
         }
 
         if (isNewData) {

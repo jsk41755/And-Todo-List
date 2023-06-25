@@ -21,16 +21,12 @@ class CustomDialog(
     private val activity: MainActivity,
     private val dialogInterface: CustomDialogInterface
 ) : Dialog(activity) {
+    //context가 아니라 왠 activity?
     private lateinit var addButton: Button
     private lateinit var todoTitle : TextView
     private lateinit var todoSwitch : Switch
 
     private lateinit var todoViewModel: TodoListViewModel
-
-    init {
-        Log.d("CustomDialog", "Context: $context")
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
