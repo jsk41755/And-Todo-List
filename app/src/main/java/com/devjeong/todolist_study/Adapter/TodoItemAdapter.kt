@@ -22,6 +22,8 @@ class TodoItemAdapter(
     private val deleteItemCallback: (todoItem: TodoItem) -> Unit,
     private val updateItemCallback: (todoItem: TodoItem) -> Unit
 ) : RecyclerView.Adapter<TodoItemAdapter.ViewHolder>() {
+
+    var date: String = ""
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.todo_item, parent, false)
         return ViewHolder(view)
@@ -35,6 +37,12 @@ class TodoItemAdapter(
     override fun getItemCount(): Int {
         return todoList.size
     }
+    fun updateItems(items: List<TodoItem>) {
+        todoList.clear()
+        todoList.addAll(items)
+        notifyDataSetChanged()
+    }
+
     fun removeData(position: Int) {
         val deletedItem = todoList.removeAt(position)
         notifyItemRemoved(position)

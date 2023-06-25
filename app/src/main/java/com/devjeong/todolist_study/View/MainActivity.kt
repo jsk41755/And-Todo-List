@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
@@ -28,10 +29,19 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
     private lateinit var searchView: SearchView
     private lateinit var containerLayout: LinearLayout
     private lateinit var refreshLayout: SwipeRefreshLayout
+    private lateinit var scrollView: ScrollView
 
     private lateinit var groupedAdapters: MutableList<TodoItemAdapter> // 그룹별 TodoItemAdapter 저장 리스트
 
     private var hideCompleted = false
+    private var filteredItems: List<TodoItem> = emptyList()
+
+    private var currentPage = 1
+    private var isFetchingData = false
+
+    private var beforeDate : String ?= ""
+
+    private lateinit var groupRecyclerViews: MutableList<RecyclerView> // 그룹별 RecyclerView 저장 리스트
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,12 +52,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
             updateTodoItem(todoItem)
         })
         groupedAdapters = mutableListOf() // 그룹별 TodoItemAdapter 리스트 초기화
+        groupRecyclerViews = mutableListOf() // 그룹별 RecyclerView 리스트 초기화
 
         todoViewModel = ViewModelProvider(this)[TodoListViewModel::class.java]
         searchViewModel = ViewModelProvider(this)[TodoViewModel::class.java]
         searchView = binding.searchView
         containerLayout = binding.containerLayout
-        refreshLayout = binding.refreshLayout
+        //refreshLayout = binding.refreshLayout
+        scrollView = binding.scrollView
 
         todoViewModel.deleteResult.observe(this) { result ->
             if (result) {
@@ -59,12 +71,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
         }
 
         fetchTodoItems()
+        setupScrollListener()
 
-        refreshLayout.setDistanceToTriggerSync(400)
+        /*refreshLayout.setDistanceToTriggerSync(400)
         refreshLayout.setOnRefreshListener {
             refreshLayout.isRefreshing = false
             fetchTodoItems()
-        }
+        }*/
 
         binding.CompleteBtn.setOnClickListener {
             hideCompleted = !hideCompleted
@@ -83,62 +96,76 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
             }
         })
     }
+    private fun createGroupRecyclerView(date: String, items: MutableList<TodoItem>) {
+        val recyclerView = RecyclerView(this)
+        recyclerView.layoutManager = LinearLayoutManager(this)
 
-    private fun observeTodoItems(todoItems: List<TodoItem>) {
-        containerLayout.removeAllViews() // 기존의 RecyclerView 삭제
+        val groupAdapter = TodoItemAdapter(items, deleteItemCallback = { todoItem ->
+            deleteTodoItem(todoItem)
+        }, updateItemCallback = { todoItem ->
+            updateTodoItem(todoItem)
+        })
 
-        val filteredItems = if (hideCompleted) {
+        recyclerView.adapter = groupAdapter
+        groupedAdapters.add(groupAdapter)
+
+        recyclerView.isNestedScrollingEnabled = false
+
+        Log.d("beforeDate", beforeDate.toString())
+        if(!date.equals(beforeDate)){
+            val dateTextView = TextView(this)
+            dateTextView.text = date
+            dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
+            dateTextView.setTypeface(null, Typeface.BOLD)
+            containerLayout.addView(dateTextView)
+        }
+        containerLayout.addView(recyclerView)
+
+        beforeDate = date
+
+        // 리사이클러뷰에 스와이프, 드래그 기능 달기
+        val swipeHelperCallback = TodoListItemHelper(groupAdapter).apply {
+            // 스와이프한 뒤 고정시킬 위치 지정
+            setClamp(resources.displayMetrics.widthPixels.toFloat() / 4)    // 1080 / 4 = 270
+        }
+        ItemTouchHelper(swipeHelperCallback).attachToRecyclerView(recyclerView)
+
+        recyclerView.setOnTouchListener { _, _ ->
+            swipeHelperCallback.removePreviousClamp(recyclerView)
+            false
+        }
+    }
+    private fun observeTodoItems(todoItems: List<TodoItem>, isNewData: Boolean) {
+        filteredItems = if (hideCompleted) {
             todoItems.filter { !it.is_done }
         } else {
             todoItems
         }
 
         val groupedItems = filteredItems.groupBy {
-            val changedUpdatedAt = it.updated_at.replace("-", ".")
-            changedUpdatedAt.substring(0, 10)
+            it.updated_at.substring(0, 10) // updated_at 값을 기준으로 그룹화
+        }
+
+        if (isNewData) {
+            containerLayout.removeAllViews() // 기존의 dateTextView 제거
         }
 
         for (group in groupedItems) {
             val date = group.key
             val items = group.value.toMutableList()
 
-            val recyclerView = RecyclerView(this)
-            recyclerView.layoutManager = LinearLayoutManager(this)
+            // 동일한 updated_at 값을 가진 경우에는 생성을 건너뜁니다.
+            if (items.size <= 1 && !isNewData) continue
 
-            val groupAdapter = TodoItemAdapter(items, deleteItemCallback = { todoItem ->
-                deleteTodoItem(todoItem)
-            }, updateItemCallback = { todoItem ->
-                updateTodoItem(todoItem)
-            })
-
-            recyclerView.adapter = groupAdapter
-            groupedAdapters.add(groupAdapter)
-
-            recyclerView.isNestedScrollingEnabled = false
-
-            val dateTextView = TextView(this)
-            dateTextView.text = date
-            dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
-            dateTextView.setTypeface(null, Typeface.BOLD)
-
-            containerLayout.addView(dateTextView)
-            containerLayout.addView(recyclerView)
-
-
-            // 리사이클러뷰에 스와이프, 드래그 기능 달기
-            val swipeHelperCallback = TodoListItemHelper(groupAdapter).apply {
-                // 스와이프한 뒤 고정시킬 위치 지정
-                setClamp(resources.displayMetrics.widthPixels.toFloat() / 4)    // 1080 / 4 = 270
-            }
-            ItemTouchHelper(swipeHelperCallback).attachToRecyclerView(recyclerView)
-
-            recyclerView.setOnTouchListener { _, _ ->
-                swipeHelperCallback.removePreviousClamp(recyclerView)
-                false
+            val index = groupedAdapters.indexOfFirst { it.date == date }
+            if (index != -1) {
+                val adapter = groupedAdapters[index]
+                adapter.updateItems(items) // 기존의 adapter에 새로운 아이템 추가
+            } else {
+                createGroupRecyclerView(date, items)
             }
         }
     }
-
     private fun observeTodoSearchItem(todoItems: List<TodoItem>) {
         containerLayout.removeAllViews()
 
@@ -163,18 +190,23 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
             dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
             dateTextView.setTypeface(null, Typeface.BOLD)
 
+            beforeDate = changedUpdatedAt
+
             containerLayout.addView(dateTextView)
             containerLayout.addView(recyclerView)
         }
     }
 
     private fun fetchTodoItems() {
-        todoViewModel.fetchTodoItems()
-        todoViewModel.todoItems.observe(this) { todoItems ->
-            observeTodoItems(todoItems)
+        todoViewModel.fetchTodoItems(currentPage) { success ->
+            val todoItems = todoViewModel.todoItems.value ?: emptyList()
+            if (currentPage > 1) {
+                observeTodoItems(todoItems, false)
+            } else {
+                observeTodoItems(todoItems, true)
+            }
         }
     }
-
     private fun fetchTodoSearchItems(query: String? = null) {
         if (query?.isNotEmpty() == true) {
             searchViewModel.fetchTodoSearchItem(query)
@@ -194,5 +226,28 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
 
     private fun updateTodoItem(item: TodoItem) {
         todoViewModel.updateTodoItem(item)
+    }
+
+    private fun setupScrollListener() {
+        scrollView.viewTreeObserver.addOnScrollChangedListener {
+            val view = scrollView.getChildAt(scrollView.childCount - 1)
+            val diff = view.bottom - (scrollView.height + scrollView.scrollY)
+            if (diff == 0 && !isFetchingData) {
+                // 스크롤이 화면 하단에 도달한 경우
+                isFetchingData = true // 중복 호출 방지를 위해 플래그 설정
+                currentPage++ // 페이지 값 증가
+                todoViewModel.fetchTodoItems(currentPage) { success ->
+                    isFetchingData = false // 데이터 호출이 완료되면 플래그 해제
+
+                    // 새로운 아이템을 가져와서 기존 groupRecyclerView에 추가
+                    val todoItems = todoViewModel.todoItems.value ?: emptyList()
+                    if (currentPage > 1) {
+                        observeTodoItems(todoItems, false)
+                    } else {
+                        observeTodoItems(todoItems, true)
+                    }
+                }
+            }
+        }
     }
 }

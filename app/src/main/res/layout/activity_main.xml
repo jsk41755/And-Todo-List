@@ -8,10 +8,6 @@
     android:layout_height="match_parent"
     tools:context=".View.MainActivity">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/refreshLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/SearchlinearLayout"
@@ -39,8 +35,8 @@
             android:layout_height="match_parent"
             android:layout_marginTop="10dp">
 
-
             <ScrollView
+                android:id="@+id/scrollView"
                 android:contentDescription="@string/scroll"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
@@ -74,6 +70,5 @@
 
     </LinearLayout>
 
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
   </androidx.constraintlayout.widget.ConstraintLayout>

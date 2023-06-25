@@ -19,12 +19,12 @@ class TodoListViewModel : ViewModel() {
 
     private val _deleteResult = MutableLiveData<Boolean>()
     val deleteResult: LiveData<Boolean> get() = _deleteResult
-    fun fetchTodoItems() {
+    fun fetchTodoItems(page: Int, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
             try {
                 val retrofit = RetrofitClient.createService(ApiService::class.java)
                 val response = withContext(Dispatchers.IO) {
-                    retrofit.getTodoLists().execute()
+                    retrofit.getTodoLists(page = page).execute()
                 }
 
                 if (response.isSuccessful) {
@@ -32,12 +32,15 @@ class TodoListViewModel : ViewModel() {
                     if (todoResponse != null) {
                         val todoItems = todoResponse.data
                         _todoItems.value = todoItems
+                        callback(true) // 성공적으로 데이터를 가져왔음을 알림
                     }
                 } else {
                     Log.d("TodoViewModel", "API 호출 실패")
+                    callback(false) // 데이터 가져오기 실패를 알림
                 }
             } catch (e: IOException) {
                 Log.e("TodoViewModel", "API 호출 실패: ${e.message}")
+                callback(false) // 데이터 가져오기 실패를 알림
             }
         }
     }
