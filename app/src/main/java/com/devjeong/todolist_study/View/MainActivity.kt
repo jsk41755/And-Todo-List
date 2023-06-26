@@ -10,6 +10,7 @@ import android.widget.ScrollView
 import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,7 +31,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
     private lateinit var searchViewModel: TodoViewModel
     private lateinit var adapter: TodoItemAdapter
     private lateinit var containerLayout: LinearLayout
-    private lateinit var scrollView: ScrollView
+    private lateinit var scrollView: NestedScrollView
 
     private lateinit var groupedAdapters: MutableList<TodoItemAdapter> // 그룹별 TodoItemAdapter 저장 리스트
 
@@ -73,11 +74,11 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
         fetchTodoItems()
         setupScrollListener()
 
-        /*refreshLayout.setDistanceToTriggerSync(400)
-        refreshLayout.setOnRefreshListener {
-            refreshLayout.isRefreshing = false
+        binding.refreshLayout.setDistanceToTriggerSync(400)
+        binding.refreshLayout.setOnRefreshListener {
+            binding.refreshLayout.isRefreshing = false
             fetchTodoItems()
-        }*/
+        }
 
         binding.addDialogBtn.setOnClickListener {
             val customDialog = CustomDialog(this@MainActivity, object : CustomDialogInterface {
