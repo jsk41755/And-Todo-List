@@ -24,7 +24,6 @@ import com.devjeong.todolist_study.databinding.FragmentHomeBinding
 import com.devjeong.todolist_study.view.custom_dialog.CustomDialogInterface
 import com.devjeong.todolist_study.view.custom_dialog.ui.CustomDialog
 import com.devjeong.todolist_study.viewModel.TodoListViewModel
-import com.devjeong.todolist_study.viewModel.TodoSearchViewModel
 import com.devjeong.todolist_study.R
 
 class HomeFragment : BaseFragment<FragmentHomeBinding>() {
@@ -75,6 +74,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             }
         }
 
+        todoViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            Log.d("TodoViewModel", message.toString())
+        }
+
         fetchTodoItems()
         setupScrollListener()
 
@@ -119,11 +123,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 return true
             }
         })
-
-        todoViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-            Log.d("TodoViewModel", message.toString())
-        }
     }
 
     private fun createGroupRecyclerView(date: String, items: MutableList<TodoItem>) {
