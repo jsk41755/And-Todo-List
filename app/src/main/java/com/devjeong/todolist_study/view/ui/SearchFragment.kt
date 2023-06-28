@@ -82,11 +82,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         scrollView = binding.scrollView
 
         todoViewModel.deleteResult.observe(viewLifecycleOwner) { result ->
-            if (result) {
-                fetchTodoItems()
-            } else {
-                // 삭제 실패 처리
-            }
+            fetchTodoSearchItems(query!!)
         }
 
         fetchTodoSearchItems(query!!)
@@ -129,9 +125,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
 
         beforeDate = date
 
-        // 리사이클러뷰에 스와이프, 드래그 기능 달기
         val swipeHelperCallback = TodoListItemHelper(groupAdapter).apply {
-            // 스와이프한 뒤 고정시킬 위치 지정
             setClamp(resources.displayMetrics.widthPixels.toFloat() / 4)    // 1080 / 4 = 270
         }
         ItemTouchHelper(swipeHelperCallback).attachToRecyclerView(recyclerView)
@@ -153,14 +147,13 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         }
 
         if (isNewData) {
-            containerLayout.removeAllViews() // 기존의 dateTextView 제거
+            containerLayout.removeAllViews()
         }
 
         for (group in groupedItems) {
             val date = group.key
             val items = group.value.toMutableList()
 
-            // 동일한 updated_at 값을 가진 경우에는 생성을 건너뜁니다.
             if (items.size <= 1 && !isNewData) continue
 
             val index = groupedAdapters.indexOfFirst { it.date == date }
@@ -184,14 +177,13 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         }
 
         if (isNewData) {
-            containerLayout.removeAllViews() // 기존의 dateTextView 제거
+            containerLayout.removeAllViews()
         }
 
         for (group in groupedItems) {
             val date = group.key
             val items = group.value.toMutableList()
 
-            // 동일한 updated_at 값을 가진 경우에는 생성을 건너뜁니다.
             if (items.size <= 1 && !isNewData) continue
 
             val index = groupedAdapters.indexOfFirst { it.date == date }
@@ -239,11 +231,11 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
             val view = scrollView.getChildAt(scrollView.childCount - 1)
             val diff = view.bottom - (scrollView.height + scrollView.scrollY)
             if (diff == 0 && !isFetchingData) {
-                // 스크롤이 화면 하단에 도달한 경우
-                isFetchingData = true // 중복 호출 방지를 위해 플래그 설정
-                currentPage++ // 페이지 값 증가
+
+                isFetchingData = true
+                currentPage++
                 searchViewModel.fetchTodoSearchItem(query!!, currentPage) { success ->
-                    isFetchingData = false // 데이터 호출이 완료되면 플래그 해제
+                    isFetchingData = false
 
                     // 새로운 아이템을 가져와서 기존 groupRecyclerView에 추가
                     val todoItems = searchViewModel.todoItem.value ?: emptyList()
