@@ -164,7 +164,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
         beforeDate = date
 
-        // 리사이클러뷰에 스와이프, 드래그 기능 달기
         val swipeHelperCallback = TodoListItemHelper(groupAdapter).apply {
             // 스와이프한 뒤 고정시킬 위치 지정
             setClamp(resources.displayMetrics.widthPixels.toFloat() / 4)    // 1080 / 4 = 270

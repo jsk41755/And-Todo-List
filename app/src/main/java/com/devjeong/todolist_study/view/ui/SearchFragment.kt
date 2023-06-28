@@ -91,14 +91,13 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
             }
         }
 
-        fetchTodoSearchItems(query)
+        fetchTodoSearchItems(query!!)
         setupScrollListener()
 
         binding.CompleteBtn.setOnClickListener {
             hideCompleted = !hideCompleted
             fetchTodoItems()
         }
-
     }
 
     private fun createGroupRecyclerView(date: String, items: MutableList<TodoItem>) {
@@ -171,34 +170,35 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
             }
         }
     }
-    private fun observeTodoSearchItem(todoItems: List<TodoItem>) {
-        containerLayout.removeAllViews()
+    private fun observeTodoSearchItem(todoItems: List<TodoItem>, isNewData: Boolean) {
+        filteredItems = if (hideCompleted) {
+            todoItems.filter { !it.is_done }
+        } else {
+            todoItems
+        }
 
-        for (todoItem in todoItems) {
-            val changedUpdatedAt = todoItem.updated_at.replace("-", ".").substring(0, 10)
+        val groupedItems = filteredItems.groupBy {
+            it.updated_at.replace("-", ".").substring(0, 10) // updated_at 값을 기준으로 그룹화
+        }
 
-            val recyclerView = RecyclerView(requireContext())
-            recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        if (isNewData) {
+            containerLayout.removeAllViews() // 기존의 dateTextView 제거
+        }
 
-            val items = mutableListOf(todoItem)
+        for (group in groupedItems) {
+            val date = group.key
+            val items = group.value.toMutableList()
 
-            val adapter = TodoItemAdapter(items, deleteItemCallback = { item ->
-                deleteTodoItem(item)
-            }, updateItemCallback = { item ->
-                updateTodoItem(item)
-            })
+            // 동일한 updated_at 값을 가진 경우에는 생성을 건너뜁니다.
+            if (items.size <= 1 && !isNewData) continue
 
-            recyclerView.adapter = adapter
-
-            val dateTextView = TextView(requireContext())
-            dateTextView.text = changedUpdatedAt
-            dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
-            dateTextView.setTypeface(null, Typeface.BOLD)
-
-            beforeDate = changedUpdatedAt
-
-            containerLayout.addView(dateTextView)
-            containerLayout.addView(recyclerView)
+            val index = groupedAdapters.indexOfFirst { it.date == date }
+            if (index != -1) {
+                val adapter = groupedAdapters[index]
+                adapter.updateItems(items) // 기존의 adapter에 새로운 아이템 추가
+            } else {
+                createGroupRecyclerView(date, items)
+            }
         }
     }
 
@@ -206,24 +206,21 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         todoViewModel.fetchTodoItems(currentPage) { success ->
             val todoItems = todoViewModel.todoItems.value ?: emptyList()
             if (currentPage > 1) {
-                observeTodoItems(todoItems, false)
+                observeTodoSearchItem(todoItems, false)
             } else {
-                observeTodoItems(todoItems, true)
+                observeTodoSearchItem(todoItems, true)
             }
         }
     }
 
-    private fun fetchTodoSearchItems(query: String? = null) {
-        if (query?.isNotEmpty() == true) {
-            searchViewModel.fetchTodoSearchItem(query)
-            searchViewModel.todoItem.observe(viewLifecycleOwner) { todoItems ->
-                observeTodoSearchItem(todoItems)
+    private fun fetchTodoSearchItems(query: String) {
+        searchViewModel.fetchTodoSearchItem(query, currentPage) {
+            val todoItems = searchViewModel.todoItem.value ?: emptyList()
+            if (currentPage > 1) {
+                observeTodoItems(todoItems, false)
+            } else {
+                observeTodoItems(todoItems, true)
             }
-            searchViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            Toast.makeText(requireContext(), "입력을 해주세요!!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -243,15 +240,15 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
                 // 스크롤이 화면 하단에 도달한 경우
                 isFetchingData = true // 중복 호출 방지를 위해 플래그 설정
                 currentPage++ // 페이지 값 증가
-                todoViewModel.fetchTodoItems(currentPage) { success ->
+                searchViewModel.fetchTodoSearchItem(query!!, currentPage) { success ->
                     isFetchingData = false // 데이터 호출이 완료되면 플래그 해제
 
                     // 새로운 아이템을 가져와서 기존 groupRecyclerView에 추가
                     val todoItems = todoViewModel.todoItems.value ?: emptyList()
                     if (currentPage > 1) {
-                        observeTodoItems(todoItems, false)
+                        observeTodoSearchItem(todoItems, false)
                     } else {
-                        observeTodoItems(todoItems, true)
+                        observeTodoSearchItem(todoItems, true)
                     }
                 }
             }

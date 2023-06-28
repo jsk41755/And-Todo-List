@@ -29,7 +29,9 @@ interface ApiService {
     //검색 기능인데 프래그먼트로 바꾸고 로직 처리를 달리 해야함.
     @GET("todos/search")
     fun getTodoItem(
-        @Query("query") title: String
+        @Query("query") title: String,
+        @Query("page") page: Int = 1,
+        @Query("per_page") perPage: Int = 20
     ): Call<TodoResponse>
 
     @GET("todos/{id}")
