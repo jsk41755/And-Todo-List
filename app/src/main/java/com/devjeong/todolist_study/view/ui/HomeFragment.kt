@@ -97,7 +97,12 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
         binding.CompleteBtn.setOnClickListener {
             hideCompleted = !hideCompleted
-            fetchTodoItems()
+            beforeDate = ""
+            var tempPage = currentPage
+            currentPage = 1
+            for(i in 1..tempPage){
+                fetchTodoItems()
+            }
         }
 
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {

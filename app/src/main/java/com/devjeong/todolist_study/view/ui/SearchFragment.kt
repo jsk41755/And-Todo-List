@@ -91,7 +91,11 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         binding.CompleteBtn.setOnClickListener {
             hideCompleted = !hideCompleted
             beforeDate = ""
-            fetchTodoSearchItems(query!!)
+            var tempPage = currentPage
+            currentPage = 1
+            for(i in 1..tempPage){
+                fetchTodoSearchItems(query!!)
+            }
         }
 
         searchViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
