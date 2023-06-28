@@ -66,12 +66,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         containerLayout = binding.containerLayout
         scrollView = binding.scrollView
 
-        todoViewModel.deleteResult.observe(viewLifecycleOwner) { result ->
-            if (result) {
-                fetchTodoItems()
-            } else {
-                // 삭제 실패 처리
-            }
+        todoViewModel.deleteResult.observe(viewLifecycleOwner) { _ ->
+            fetchTodoItems()
         }
 
         todoViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
@@ -92,6 +88,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             val customDialog = CustomDialog(this@HomeFragment, object : CustomDialogInterface {
                 override fun onAddButtonClicked() {
                     currentPage = 1
+                    containerLayout.removeAllViews()
                     fetchTodoItems()
                 }
             })
@@ -139,8 +136,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 Log.d("isClicked", currentPage.toString())
                 val customDialog = CustomDialog(this@HomeFragment, object : CustomDialogInterface {
                     override fun onAddButtonClicked() {
-                        // Add 버튼이 클릭되었을 때의 동작 처리
                         currentPage = 1
+                        //containerLayout.removeAllViews()
                         fetchTodoItems()
                     }
                 })
@@ -189,20 +186,19 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         }
 
         if (isNewData) {
-            containerLayout.removeAllViews() // 기존의 dateTextView 제거
+            containerLayout.removeAllViews()
         }
 
         for (group in groupedItems) {
             val date = group.key
             val items = group.value.toMutableList()
 
-            // 동일한 updated_at 값을 가진 경우에는 생성을 건너뜁니다.
             if (items.size <= 1 && !isNewData) continue
 
             val index = groupedAdapters.indexOfFirst { it.date == date }
             if (index != -1) {
                 val adapter = groupedAdapters[index]
-                adapter.updateItems(items) // 기존의 adapter에 새로운 아이템 추가
+                adapter.updateItems(items)
             } else {
                 createGroupRecyclerView(date, items)
             }
