@@ -1,12 +1,13 @@
 package com.devjeong.todolist_study.view.custom_dialog.ui
 
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
+import android.app.Dialog
+import android.content.Context
+import android.view.Window
 import com.devjeong.todolist_study.R
 
-class ProgressDialog : AppCompatActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_progress_dialog)
+class ProgressDialog(context: Context) : Dialog(context) {
+    init {
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        setContentView(R.layout.progress_dialog)
     }
 }

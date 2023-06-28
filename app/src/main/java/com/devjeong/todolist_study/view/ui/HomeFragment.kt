@@ -1,6 +1,7 @@
 package com.devjeong.todolist_study.view.ui
 
 import android.graphics.Typeface
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
@@ -26,6 +27,10 @@ import com.devjeong.todolist_study.view.custom_dialog.CustomDialogInterface
 import com.devjeong.todolist_study.view.custom_dialog.ui.CustomDialog
 import com.devjeong.todolist_study.viewModel.TodoListViewModel
 import com.devjeong.todolist_study.R
+import com.devjeong.todolist_study.view.custom_dialog.ui.ProgressDialog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private lateinit var todoViewModel: TodoListViewModel
@@ -45,6 +50,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
     private lateinit var groupRecyclerViews: MutableList<RecyclerView> // 그룹별 RecyclerView 저장 리스트
 
+    private lateinit var customProgressDialog: ProgressDialog
+
     override fun getFragmentBinding(
         inflater: LayoutInflater,
         container: ViewGroup?
@@ -54,6 +61,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        customProgressDialog = ProgressDialog(requireContext())
+        customProgressDialog.window?.setBackgroundDrawable(ColorDrawable(android.graphics.Color.TRANSPARENT))
+        customProgressDialog.setCancelable(false)
+        customProgressDialog.show()
 
         adapter = TodoItemAdapter(mutableListOf(), deleteItemCallback = { todoItem ->
             deleteTodoItem(todoItem)
@@ -68,7 +80,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         scrollView = binding.scrollView
 
         todoViewModel.deleteResult.observe(viewLifecycleOwner) { _ ->
-            fetchTodoItems()
+            fetchTodoItems { success ->
+                customProgressDialog.dismiss()
+            }
         }
 
         todoViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
@@ -76,13 +90,15 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             Log.d("TodoViewModel", message.toString())
         }
 
-        fetchTodoItems()
+        //fetchTodoItems()
         setupScrollListener()
 
         binding.refreshLayout.setDistanceToTriggerSync(400)
         binding.refreshLayout.setOnRefreshListener {
             binding.refreshLayout.isRefreshing = false
-            fetchTodoItems()
+            fetchTodoItems { _ ->
+                customProgressDialog.dismiss()
+            }
         }
 
         binding.addDialogBtn.setOnClickListener {
@@ -90,7 +106,17 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 override fun onAddButtonClicked() {
                     currentPage = 1
                     containerLayout.removeAllViews()
-                    fetchTodoItems()
+                    fetchTodoItems { success ->
+                        // 비동기 작업 완료 후 호출되는 콜백
+                        // 다이얼로그 닫기
+                        customProgressDialog.dismiss()
+
+                        if (success) {
+                            // 데이터를 성공적으로 가져온 경우의 처리
+                        } else {
+                            // 데이터 가져오기 실패 시의 처리
+                        }
+                    }
                 }
             })
             customDialog.show()
@@ -107,7 +133,17 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             var tempPage = currentPage
             currentPage = 1
             for(i in 1..tempPage){
-                fetchTodoItems()
+                fetchTodoItems { success ->
+                    // 비동기 작업 완료 후 호출되는 콜백
+                    // 다이얼로그 닫기
+                    customProgressDialog.dismiss()
+
+                    if (success) {
+                        // 데이터를 성공적으로 가져온 경우의 처리
+                    } else {
+                        // 데이터 가져오기 실패 시의 처리
+                    }
+                }
             }
         }
 
@@ -130,6 +166,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 return true
             }
         })
+
+        fetchTodoItems { _ ->
+            customProgressDialog.dismiss()
+        }
     }
 
     private fun createGroupRecyclerView(date: String, items: MutableList<TodoItem>) {
@@ -140,7 +180,9 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             deleteTodoItem(todoItem)
         }, updateItemCallback = { todoItem ->
             updateTodoItem(todoItem)
-            fetchTodoItems()
+            fetchTodoItems { _ ->
+                customProgressDialog.dismiss()
+            }
         })
 
         groupAdapter.setOnItemClickListener(object : TodoItemAdapter.OnItemClickListener {
@@ -150,7 +192,17 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                     override fun onAddButtonClicked() {
                         currentPage = 1
                         //containerLayout.removeAllViews()
-                        fetchTodoItems()
+                        fetchTodoItems { success ->
+                            // 비동기 작업 완료 후 호출되는 콜백
+                            // 다이얼로그 닫기
+                            customProgressDialog.dismiss()
+
+                            if (success) {
+                                // 데이터를 성공적으로 가져온 경우의 처리
+                            } else {
+                                // 데이터 가져오기 실패 시의 처리
+                            }
+                        }
                     }
                 })
                 customDialog.show()
@@ -218,7 +270,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         }
     }
 
-    private fun fetchTodoItems() {
+    private fun fetchTodoItems(completion: (Boolean) -> Unit) {
         todoViewModel.fetchTodoItems(currentPage) { success ->
             val todoItems = todoViewModel.todoItems.value ?: emptyList()
             if (currentPage > 1) {
@@ -226,6 +278,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             } else {
                 observeTodoItems(todoItems, true)
             }
+            completion(success)
         }
     }
 
