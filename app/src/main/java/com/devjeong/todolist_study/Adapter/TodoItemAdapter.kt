@@ -1,6 +1,7 @@
 package com.devjeong.todolist_study.Adapter
 
 import android.content.Intent
+import android.graphics.Paint
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.R
@@ -72,6 +74,13 @@ class TodoItemAdapter(
             val outputFormatter = DateTimeFormatter.ofPattern("hh:mm a")
             val formattedDateTime = parsedDateTime.format(outputFormatter)
             createdAtTextView.text = formattedDateTime
+
+            if(todoItem.is_done){
+                titleTextView.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+                titleTextView.setTextColor(ContextCompat.getColor(itemView.context, R.color.gray500))
+                createdAtTextView.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+                createdAtTextView.setTextColor(ContextCompat.getColor(itemView.context, R.color.gray500))
+            }
 
             removeTxt.setOnClickListener {
                 removeData(this.layoutPosition)

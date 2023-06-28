@@ -3,7 +3,9 @@
     <style name="Base.Theme.TodoList_Study" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:textCursorDrawable">@color/dbnorange</item>
+        <item name="android:colorAccent">@color/dbnorange</item>
+        <item name="android:textColorHighlight">@color/dbnorange</item>
     </style>
-
     <style name="Theme.TodoList_Study" parent="Base.Theme.TodoList_Study" />
 </resources>

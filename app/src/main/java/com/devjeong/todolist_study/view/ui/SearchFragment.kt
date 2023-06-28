@@ -2,6 +2,10 @@ package com.devjeong.todolist_study.view.ui
 
 import android.graphics.Typeface
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -10,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
@@ -20,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.devjeong.todolist_study.Adapter.TodoItemAdapter
 import com.devjeong.todolist_study.BaseFragment
 import com.devjeong.todolist_study.Model.TodoItem
+import com.devjeong.todolist_study.R
 import com.devjeong.todolist_study.TodoListItemHelper
 import com.devjeong.todolist_study.databinding.FragmentSearchBinding
 import com.devjeong.todolist_study.viewModel.TodoListViewModel
@@ -66,7 +72,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         Navigation.setViewNavController(requireView(), navController)
 
         Log.d("query", query ?: "Query is null")
-        binding.searchTitle.text = "${query}(으)로 검색된 결과"
+        binding.searchTitle.text = getFormattedSearchTitle(query!!)
 
         adapter = TodoItemAdapter(mutableListOf(), deleteItemCallback = { todoItem ->
             deleteTodoItem(todoItem)
@@ -108,6 +114,23 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         }
     }
 
+    private fun getFormattedSearchTitle(query: String): SpannableString {
+        val fullText = "${query}(으)로 검색된 결과"
+        val spannableString = SpannableString(fullText)
+
+        val startIndex = fullText.indexOf(query)
+        val endIndex = startIndex + query.length
+
+        val colorSpan = ForegroundColorSpan(ContextCompat.getColor(requireContext(), R.color.dbnorange))
+        val boldSpan = StyleSpan(Typeface.BOLD)
+
+        spannableString.setSpan(colorSpan, startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(boldSpan, startIndex, endIndex, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        return spannableString
+    }
+
+
     private fun createGroupRecyclerView(date: String, items: MutableList<TodoItem>) {
         val recyclerView = RecyclerView(requireContext())
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -116,6 +139,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
             deleteTodoItem(todoItem)
         }, updateItemCallback = { todoItem ->
             updateTodoItem(todoItem)
+            fetchTodoSearchItems(query!!) //응답이 바로 안와서 바로 반영 안됨.
         })
 
         recyclerView.adapter = groupAdapter
@@ -127,6 +151,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
             val dateTextView = TextView(requireContext())
             dateTextView.text = date
             dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
+            dateTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
             dateTextView.setTypeface(null, Typeface.BOLD)
             containerLayout.addView(dateTextView)
         }

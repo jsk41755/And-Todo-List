@@ -3,8 +3,8 @@
     <!-- Unchecked -->
     <item android:state_checked="false">
         <shape>
-            <stroke android:color="#c4cbd2" android:width="1dp" />
-            <corners android:radius="4dp" />
+            <stroke android:color="#c4cbd2" android:width="2dp" />
+            <corners android:radius="2dp" />
             <solid android:color="#fff" />
         </shape>
     </item>

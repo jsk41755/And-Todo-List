@@ -44,7 +44,9 @@
                 android:id="@+id/TodoIsDone"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:buttonTint="#000000"
+                android:scaleX="1.2"
+                android:scaleY="1.2"
+                android:buttonTint="@color/dbnorange"
                 android:layout_gravity="center"/>
 
             <LinearLayout
@@ -56,6 +58,7 @@
                     android:id="@+id/TodoSaveContentTxt"
                     android:text="@string/todo_content"
                     android:textSize="18sp"
+                    android:textColor="#737373"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 
@@ -63,6 +66,7 @@
                     android:id="@+id/TodoSaveTimeTxt"
                     android:text="@string/todo_time"
                     android:textSize="15sp"
+                    android:textColor="#A3A3A3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 

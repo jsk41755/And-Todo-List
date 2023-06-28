@@ -11,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -139,6 +140,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             deleteTodoItem(todoItem)
         }, updateItemCallback = { todoItem ->
             updateTodoItem(todoItem)
+            fetchTodoItems()
         })
 
         groupAdapter.setOnItemClickListener(object : TodoItemAdapter.OnItemClickListener {
@@ -166,6 +168,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             val dateTextView = TextView(requireContext())
             dateTextView.text = date
             dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
+            dateTextView.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
             dateTextView.setTypeface(null, Typeface.BOLD)
             containerLayout.addView(dateTextView)
         }
