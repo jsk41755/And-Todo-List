@@ -22,8 +22,6 @@ import com.devjeong.todolist_study.BaseFragment
 import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.TodoListItemHelper
 import com.devjeong.todolist_study.databinding.FragmentSearchBinding
-import com.devjeong.todolist_study.view.custom_dialog.CustomDialogInterface
-import com.devjeong.todolist_study.view.custom_dialog.ui.CustomDialog
 import com.devjeong.todolist_study.viewModel.TodoListViewModel
 import com.devjeong.todolist_study.viewModel.TodoSearchViewModel
 
@@ -97,6 +95,10 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         binding.CompleteBtn.setOnClickListener {
             hideCompleted = !hideCompleted
             fetchTodoItems()
+        }
+
+        searchViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -244,7 +246,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
                     isFetchingData = false // 데이터 호출이 완료되면 플래그 해제
 
                     // 새로운 아이템을 가져와서 기존 groupRecyclerView에 추가
-                    val todoItems = todoViewModel.todoItems.value ?: emptyList()
+                    val todoItems = searchViewModel.todoItem.value ?: emptyList()
                     if (currentPage > 1) {
                         observeTodoSearchItem(todoItems, false)
                     } else {

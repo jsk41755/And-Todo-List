@@ -27,21 +27,23 @@ class TodoSearchViewModel : ViewModel() {
                 val response = withContext(Dispatchers.IO) {
                     retrofit.getTodoItem(query, page = page).execute()
                 }
-
                 if (response.isSuccessful) {
                     val todoResponse = response.body()
                     if (todoResponse != null) {
                         val todoItems = todoResponse.data
                         _todoItem.value = todoItems
-                        callback(true) // 성공적으로 데이터를 가져왔음을 알림
+                        callback(true)
+                    }
+                    if(response.code() == 204){
+                        _toastMessage.value = todoResponse?.message
                     }
                 } else {
                     Log.d("TodoViewModel", "API 호출 실패")
-                    callback(false) // 데이터 가져오기 실패를 알림
+                    callback(false)
                 }
             } catch (e: IOException) {
                 Log.e("TodoViewModel", "API 호출 실패: ${e.message}")
-                callback(false) // 데이터 가져오기 실패를 알림
+                callback(false)
             }
         }
     }
