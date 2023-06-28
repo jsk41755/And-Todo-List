@@ -81,7 +81,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         containerLayout = binding.containerLayout
         scrollView = binding.scrollView
 
-        todoViewModel.deleteResult.observe(viewLifecycleOwner) { result ->
+        todoViewModel.deleteResult.observe(viewLifecycleOwner) { _ ->
             fetchTodoSearchItems(query!!)
         }
 
