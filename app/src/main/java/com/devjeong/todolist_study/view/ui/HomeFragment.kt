@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.ViewModelProvider
@@ -28,7 +29,6 @@ import com.devjeong.todolist_study.R
 
 class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private lateinit var todoViewModel: TodoListViewModel
-    private lateinit var searchViewModel: TodoSearchViewModel
     private lateinit var adapter: TodoItemAdapter
     private lateinit var containerLayout: LinearLayout
     private lateinit var scrollView: NestedScrollView
@@ -64,7 +64,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         groupRecyclerViews = mutableListOf() // 그룹별 RecyclerView 리스트 초기화
 
         todoViewModel = ViewModelProvider(this)[TodoListViewModel::class.java]
-        searchViewModel = ViewModelProvider(this)[TodoSearchViewModel::class.java]
         containerLayout = binding.containerLayout
         scrollView = binding.scrollView
 
@@ -120,6 +119,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 return true
             }
         })
+
+        todoViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
+            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            Log.d("TodoViewModel", message.toString())
+        }
     }
 
     private fun createGroupRecyclerView(date: String, items: MutableList<TodoItem>) {
@@ -231,11 +235,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             val view = scrollView.getChildAt(scrollView.childCount - 1)
             val diff = view.bottom - (scrollView.height + scrollView.scrollY)
             if (diff == 0 && !isFetchingData) {
-                // 스크롤이 화면 하단에 도달한 경우
-                isFetchingData = true // 중복 호출 방지를 위해 플래그 설정
-                currentPage++ // 페이지 값 증가
+                isFetchingData = true
+                currentPage++
                 todoViewModel.fetchTodoItems(currentPage) { success ->
-                    isFetchingData = false // 데이터 호출이 완료되면 플래그 해제
+                    isFetchingData = false
 
                     // 새로운 아이템을 가져와서 기존 groupRecyclerView에 추가
                     val todoItems = todoViewModel.todoItems.value ?: emptyList()

@@ -22,8 +22,8 @@ class TodoListViewModel : ViewModel() {
     private val _deleteResult = MutableLiveData<Boolean>()
     val deleteResult: LiveData<Boolean> get() = _deleteResult
 
-    private val _error = MutableLiveData<String>()
-    val error: LiveData<String> = _error
+    private val _toastMessage = MutableLiveData<String>()
+    val toastMessage: LiveData<String> get() = _toastMessage
     fun fetchTodoItems(page: Int, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
             try {
@@ -38,6 +38,9 @@ class TodoListViewModel : ViewModel() {
                         val todoItems = todoResponse.data
                         _todoItems.value = todoItems
                         callback(true) // 성공적으로 데이터를 가져왔음을 알림
+                    }
+                    if(response.code() == 204){
+                        _toastMessage.value = todoResponse?.message
                     }
                 } else {
                     Log.d("TodoViewModel", "API 호출 실패")
@@ -83,6 +86,7 @@ class TodoListViewModel : ViewModel() {
                     val errorBody = response.errorBody()?.string()
                     val decodedMessage = decodeUnicodeEscapeSequence(errorBody.toString())
                     Log.d("TodoViewModel", "API 호출 실패, 오류 메시지: $decodedMessage")
+                    _toastMessage.value = decodedMessage
                 }
             } catch (e: IOException) {
                 Log.e("TodoViewModel", "API 호출 실패: ${e.message}")
