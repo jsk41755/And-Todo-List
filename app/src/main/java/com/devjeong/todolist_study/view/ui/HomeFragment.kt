@@ -87,14 +87,14 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
         todoViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
             Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-            Log.d("TodoViewModel", message.toString())
         }
 
-        //fetchTodoItems()
         setupScrollListener()
 
         binding.refreshLayout.setDistanceToTriggerSync(400)
         binding.refreshLayout.setOnRefreshListener {
+            customProgressDialog.show()
+
             binding.refreshLayout.isRefreshing = false
             fetchTodoItems { _ ->
                 customProgressDialog.dismiss()
@@ -106,16 +106,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 override fun onAddButtonClicked() {
                     currentPage = 1
                     containerLayout.removeAllViews()
-                    fetchTodoItems { success ->
-                        // 비동기 작업 완료 후 호출되는 콜백
-                        // 다이얼로그 닫기
+                    fetchTodoItems { _ ->
                         customProgressDialog.dismiss()
-
-                        if (success) {
-                            // 데이터를 성공적으로 가져온 경우의 처리
-                        } else {
-                            // 데이터 가져오기 실패 시의 처리
-                        }
                     }
                 }
             })
@@ -123,6 +115,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         }
 
         binding.CompleteBtn.setOnClickListener {
+            customProgressDialog.show()
+
             hideCompleted = !hideCompleted
             if(!hideCompleted){
                 binding.CompleteBtn.text = "완료 숨기기"
@@ -133,16 +127,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             var tempPage = currentPage
             currentPage = 1
             for(i in 1..tempPage){
-                fetchTodoItems { success ->
-                    // 비동기 작업 완료 후 호출되는 콜백
-                    // 다이얼로그 닫기
+                fetchTodoItems { _ ->
                     customProgressDialog.dismiss()
-
-                    if (success) {
-                        // 데이터를 성공적으로 가져온 경우의 처리
-                    } else {
-                        // 데이터 가져오기 실패 시의 처리
-                    }
                 }
             }
         }
@@ -192,16 +178,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                     override fun onAddButtonClicked() {
                         currentPage = 1
                         //containerLayout.removeAllViews()
-                        fetchTodoItems { success ->
-                            // 비동기 작업 완료 후 호출되는 콜백
-                            // 다이얼로그 닫기
+                        fetchTodoItems { _ ->
                             customProgressDialog.dismiss()
-
-                            if (success) {
-                                // 데이터를 성공적으로 가져온 경우의 처리
-                            } else {
-                                // 데이터 가져오기 실패 시의 처리
-                            }
                         }
                     }
                 })
