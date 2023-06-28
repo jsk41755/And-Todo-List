@@ -1,4 +1,4 @@
-package com.devjeong.todolist_study.ViewModel
+package com.devjeong.todolist_study.viewModel
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -7,15 +7,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.Model.TodoItemDTO
-import com.devjeong.todolist_study.Retrofit.ApiService
-import com.devjeong.todolist_study.Retrofit.RetrofitClient
+import com.devjeong.todolist_study.retrofit.ApiService
+import com.devjeong.todolist_study.retrofit.RetrofitClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.ResponseBody
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import java.io.IOException
 
 class TodoListViewModel : ViewModel() {
@@ -87,7 +83,6 @@ class TodoListViewModel : ViewModel() {
             }
         }
     }
-
 
     fun updateTodoItem(todoItem: TodoItem) {
         viewModelScope.launch {

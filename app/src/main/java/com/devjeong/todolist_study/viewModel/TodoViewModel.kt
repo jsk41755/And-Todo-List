@@ -1,14 +1,13 @@
-package com.devjeong.todolist_study.ViewModel
+package com.devjeong.todolist_study.viewModel
 
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devjeong.todolist_study.Model.TodoItem
-import com.devjeong.todolist_study.Retrofit.ApiService
-import com.devjeong.todolist_study.Retrofit.RetrofitClient
+import com.devjeong.todolist_study.retrofit.ApiService
+import com.devjeong.todolist_study.retrofit.RetrofitClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

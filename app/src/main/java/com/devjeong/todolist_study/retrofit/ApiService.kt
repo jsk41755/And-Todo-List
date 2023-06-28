@@ -1,4 +1,4 @@
-package com.devjeong.todolist_study.Retrofit
+package com.devjeong.todolist_study.retrofit
 
 import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.Model.TodoItemDTO

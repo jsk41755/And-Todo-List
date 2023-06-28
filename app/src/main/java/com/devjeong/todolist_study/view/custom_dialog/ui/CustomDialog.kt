@@ -1,27 +1,25 @@
-package com.devjeong.todolist_study.View.CustomDialog
+package com.devjeong.todolist_study.view.custom_dialog.ui
 
 import android.app.Dialog
-import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.Window
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.Switch
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
-import com.devjeong.todolist_study.BaseActivity
+import com.devjeong.todolist_study.BaseFragment
 import com.devjeong.todolist_study.Model.TodoItemDTO
 import com.devjeong.todolist_study.R
-import com.devjeong.todolist_study.View.MainActivity
-import com.devjeong.todolist_study.ViewModel.TodoListViewModel
+import com.devjeong.todolist_study.view.MainActivity
+import com.devjeong.todolist_study.view.custom_dialog.CustomDialogInterface
+import com.devjeong.todolist_study.view.ui.HomeFragment
+import com.devjeong.todolist_study.viewModel.TodoListViewModel
 
 class CustomDialog(
-    private val activity: MainActivity,
+    private val fragment: HomeFragment,
     private val dialogInterface: CustomDialogInterface
-) : Dialog(activity) {
-    //context가 아니라 왠 activity?
+) : Dialog(fragment.requireActivity()) {
     private lateinit var addButton: Button
     private lateinit var todoTitle : TextView
     private lateinit var todoSwitch : Switch
@@ -40,7 +38,7 @@ class CustomDialog(
 
         window?.attributes = layoutParams
 
-        todoViewModel = ViewModelProvider(activity)[TodoListViewModel::class.java]
+        todoViewModel = ViewModelProvider(fragment.requireActivity())[TodoListViewModel::class.java]
 
         addButton = findViewById(R.id.addBtn)
         todoTitle = findViewById(R.id.todoTitle)

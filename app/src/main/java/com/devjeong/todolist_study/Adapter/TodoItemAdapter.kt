@@ -1,19 +1,16 @@
 package com.devjeong.todolist_study.Adapter
 
-import android.util.Log
+import android.content.Intent
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
-import android.widget.DatePicker
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.R
+import com.devjeong.todolist_study.view.custom_dialog.ui.CustomDialog
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -24,11 +21,19 @@ class TodoItemAdapter(
 ) : RecyclerView.Adapter<TodoItemAdapter.ViewHolder>() {
 
     var date: String = ""
+
+    interface OnItemClickListener{
+        fun onItemClick(v:View, data: TodoItem, pos : Int)
+    }
+    private var listener : OnItemClickListener? = null
+    fun setOnItemClickListener(listener : OnItemClickListener) {
+        this.listener = listener
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.todo_item, parent, false)
         return ViewHolder(view)
     }
-
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val todoItem = todoList[position]
         holder.bind(todoItem)
@@ -76,6 +81,14 @@ class TodoItemAdapter(
                 todoItem.is_done = isChecked
                 updateItemCallback(todoItem)
             }
+
+            val pos = adapterPosition
+            if(pos != RecyclerView.NO_POSITION){
+                itemView.setOnClickListener {
+                    listener?.onItemClick(itemView, todoItem, pos)
+                }
+            }
         }
     }
 }
+

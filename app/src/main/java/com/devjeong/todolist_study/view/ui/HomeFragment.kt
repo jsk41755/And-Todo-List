@@ -1,12 +1,13 @@
-package com.devjeong.todolist_study.View
+package com.devjeong.todolist_study.view.ui
 
 import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Log
 import android.util.TypedValue
-import android.widget.ImageButton
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
@@ -15,18 +16,17 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.devjeong.todolist_study.Adapter.TodoItemAdapter
-import com.devjeong.todolist_study.BaseActivity
+import com.devjeong.todolist_study.BaseFragment
 import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.TodoListItemHelper
-import com.devjeong.todolist_study.View.CustomDialog.CustomDialog
-import com.devjeong.todolist_study.View.CustomDialog.CustomDialogInterface
-import com.devjeong.todolist_study.ViewModel.TodoListViewModel
-import com.devjeong.todolist_study.ViewModel.TodoViewModel
-import com.devjeong.todolist_study.databinding.ActivityMainBinding
+import com.devjeong.todolist_study.databinding.FragmentHomeBinding
+import com.devjeong.todolist_study.view.custom_dialog.CustomDialogInterface
+import com.devjeong.todolist_study.view.custom_dialog.ui.CustomDialog
+import com.devjeong.todolist_study.viewModel.TodoListViewModel
+import com.devjeong.todolist_study.viewModel.TodoViewModel
 
-class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.inflate(it)}) {
+class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private lateinit var todoViewModel: TodoListViewModel
     private lateinit var searchViewModel: TodoViewModel
     private lateinit var adapter: TodoItemAdapter
@@ -45,8 +45,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
 
     private lateinit var groupRecyclerViews: MutableList<RecyclerView> // 그룹별 RecyclerView 저장 리스트
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun getFragmentBinding(
+        inflater: LayoutInflater,
+        container: ViewGroup?
+    ): FragmentHomeBinding {
+        return FragmentHomeBinding.inflate(inflater, container, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         adapter = TodoItemAdapter(mutableListOf(), deleteItemCallback = { todoItem ->
             deleteTodoItem(todoItem)
@@ -59,10 +66,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
         todoViewModel = ViewModelProvider(this)[TodoListViewModel::class.java]
         searchViewModel = ViewModelProvider(this)[TodoViewModel::class.java]
         containerLayout = binding.containerLayout
-        //refreshLayout = binding.refreshLayout
         scrollView = binding.scrollView
 
-        todoViewModel.deleteResult.observe(this) { result ->
+        todoViewModel.deleteResult.observe(viewLifecycleOwner) { result ->
             if (result) {
                 fetchTodoItems()
                 Log.d("TodoViewModel", "삭제 성공")
@@ -81,7 +87,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
         }
 
         binding.addDialogBtn.setOnClickListener {
-            val customDialog = CustomDialog(this@MainActivity, object : CustomDialogInterface {
+            val customDialog = CustomDialog(this@HomeFragment, object : CustomDialogInterface {
                 override fun onAddButtonClicked() {
                     // Add 버튼이 클릭되었을 때의 동작 처리
                     currentPage = 1
@@ -97,7 +103,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
             fetchTodoItems()
         }
 
-        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        /*binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 val title = query?.trim()
                 fetchTodoSearchItems(title)
@@ -107,11 +113,28 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
             override fun onQueryTextChange(newText: String?): Boolean {
                 return true
             }
+        })*/
+
+        adapter.setOnItemClickListener(object :
+            TodoItemAdapter.OnItemClickListener {
+            override fun onItemClick(v: View, data: TodoItem, pos: Int) {
+                Log.d("isClicked", currentPage.toString())
+                val customDialog = CustomDialog(this@HomeFragment, object : CustomDialogInterface {
+                    override fun onAddButtonClicked() {
+                        // Add 버튼이 클릭되었을 때의 동작 처리
+                        currentPage = 1
+                        fetchTodoItems()
+
+                    }
+                })
+                customDialog.show()
+            }
         })
     }
+
     private fun createGroupRecyclerView(date: String, items: MutableList<TodoItem>) {
-        val recyclerView = RecyclerView(this)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        val recyclerView = RecyclerView(requireContext())
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         val groupAdapter = TodoItemAdapter(items, deleteItemCallback = { todoItem ->
             deleteTodoItem(todoItem)
@@ -126,7 +149,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
 
         Log.d("beforeDate", beforeDate.toString())
         if(!date.equals(beforeDate)){
-            val dateTextView = TextView(this)
+            val dateTextView = TextView(requireContext())
             dateTextView.text = date
             dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
             dateTextView.setTypeface(null, Typeface.BOLD)
@@ -185,8 +208,8 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
         for (todoItem in todoItems) {
             val changedUpdatedAt = todoItem.updated_at.replace("-", ".").substring(0, 10)
 
-            val recyclerView = RecyclerView(this)
-            recyclerView.layoutManager = LinearLayoutManager(this)
+            val recyclerView = RecyclerView(requireContext())
+            recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
             val items = mutableListOf(todoItem) // 검색 결과 아이템을 리스트에 추가
 
@@ -198,7 +221,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
 
             recyclerView.adapter = adapter
 
-            val dateTextView = TextView(this)
+            val dateTextView = TextView(requireContext())
             dateTextView.text = changedUpdatedAt
             dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
             dateTextView.setTypeface(null, Typeface.BOLD)
@@ -220,6 +243,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
             }
         }
     }
+
     private fun fetchTodoSearchItems(query: String? = null) {
         if (query?.isNotEmpty() == true) {
             searchViewModel.fetchTodoSearchItem(query)
@@ -227,12 +251,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
                 observeTodoSearchItem(todoItems)
             }
             searchViewModel.toastMessage.observe(this) { message ->
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
             }
         } else {
-            Toast.makeText(this, "입력을 해주세요!!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "입력을 해주세요!!", Toast.LENGTH_SHORT).show()
         }
     }
+
     private fun deleteTodoItem(todoItem: TodoItem) {
         todoViewModel.deleteTodoItem(todoItem.id)
     }
@@ -263,4 +288,5 @@ class MainActivity : BaseActivity<ActivityMainBinding>({ActivityMainBinding.infl
             }
         }
     }
+
 }
