@@ -95,7 +95,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                     fetchTodoItems()
                 }
             })
-
             customDialog.show()
         }
 
