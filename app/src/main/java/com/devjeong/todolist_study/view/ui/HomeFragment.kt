@@ -106,8 +106,15 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
         binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String): Boolean {
-                val action = HomeFragmentDirections.actionHomeFragmentToSearchFragment(query)
-                findNavController().navigate(action)
+                val fragment = SearchFragment()
+                val bundle = Bundle()
+                bundle.putString("query", query)
+                fragment.arguments = bundle
+
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .add(R.id.fragmentContainer, fragment)  // 수정: fragment 변수를 전달
+                    .addToBackStack(null)
+                    .commit()
 
                 return true
             }
