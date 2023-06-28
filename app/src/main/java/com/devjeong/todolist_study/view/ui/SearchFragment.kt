@@ -90,7 +90,8 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
 
         binding.CompleteBtn.setOnClickListener {
             hideCompleted = !hideCompleted
-            fetchTodoItems()
+            beforeDate = ""
+            fetchTodoSearchItems(query!!)
         }
 
         searchViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
@@ -113,7 +114,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
 
         recyclerView.isNestedScrollingEnabled = false
 
-        Log.d("beforeDate", beforeDate.toString())
         if(!date.equals(beforeDate)){
             val dateTextView = TextView(requireContext())
             dateTextView.text = date
@@ -192,17 +192,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
                 adapter.updateItems(items) // 기존의 adapter에 새로운 아이템 추가
             } else {
                 createGroupRecyclerView(date, items)
-            }
-        }
-    }
-
-    private fun fetchTodoItems() {
-        todoViewModel.fetchTodoItems(currentPage) { success ->
-            val todoItems = todoViewModel.todoItems.value ?: emptyList()
-            if (currentPage > 1) {
-                observeTodoSearchItem(todoItems, false)
-            } else {
-                observeTodoSearchItem(todoItems, true)
             }
         }
     }
