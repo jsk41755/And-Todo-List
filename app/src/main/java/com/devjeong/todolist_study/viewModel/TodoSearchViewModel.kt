@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
-class TodoViewModel : ViewModel() {
+class TodoSearchViewModel : ViewModel() {
     private val _todoItem = MutableLiveData<List<TodoItem>>()
     val todoItem: LiveData<List<TodoItem>> get() = _todoItem
 

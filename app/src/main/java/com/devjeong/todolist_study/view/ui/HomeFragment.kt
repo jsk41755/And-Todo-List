@@ -9,9 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.widget.SearchView
-import androidx.core.os.bundleOf
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -25,13 +23,12 @@ import com.devjeong.todolist_study.databinding.FragmentHomeBinding
 import com.devjeong.todolist_study.view.custom_dialog.CustomDialogInterface
 import com.devjeong.todolist_study.view.custom_dialog.ui.CustomDialog
 import com.devjeong.todolist_study.viewModel.TodoListViewModel
-import com.devjeong.todolist_study.viewModel.TodoViewModel
+import com.devjeong.todolist_study.viewModel.TodoSearchViewModel
 import com.devjeong.todolist_study.R
-import androidx.navigation.fragment.findNavController
 
 class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private lateinit var todoViewModel: TodoListViewModel
-    private lateinit var searchViewModel: TodoViewModel
+    private lateinit var searchViewModel: TodoSearchViewModel
     private lateinit var adapter: TodoItemAdapter
     private lateinit var containerLayout: LinearLayout
     private lateinit var scrollView: NestedScrollView
@@ -67,7 +64,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         groupRecyclerViews = mutableListOf() // 그룹별 RecyclerView 리스트 초기화
 
         todoViewModel = ViewModelProvider(this)[TodoListViewModel::class.java]
-        searchViewModel = ViewModelProvider(this)[TodoViewModel::class.java]
+        searchViewModel = ViewModelProvider(this)[TodoSearchViewModel::class.java]
         containerLayout = binding.containerLayout
         scrollView = binding.scrollView
 
@@ -123,8 +120,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 return true
             }
         })
-
-
     }
 
     private fun createGroupRecyclerView(date: String, items: MutableList<TodoItem>) {
@@ -212,36 +207,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             }
         }
     }
-    private fun observeTodoSearchItem(todoItems: List<TodoItem>) {
-        containerLayout.removeAllViews()
-
-        for (todoItem in todoItems) {
-            val changedUpdatedAt = todoItem.updated_at.replace("-", ".").substring(0, 10)
-
-            val recyclerView = RecyclerView(requireContext())
-            recyclerView.layoutManager = LinearLayoutManager(requireContext())
-
-            val items = mutableListOf(todoItem) // 검색 결과 아이템을 리스트에 추가
-
-            val adapter = TodoItemAdapter(items, deleteItemCallback = { item ->
-                deleteTodoItem(item)
-            }, updateItemCallback = { item ->
-                updateTodoItem(item)
-            })
-
-            recyclerView.adapter = adapter
-
-            val dateTextView = TextView(requireContext())
-            dateTextView.text = changedUpdatedAt
-            dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 32f)
-            dateTextView.setTypeface(null, Typeface.BOLD)
-
-            beforeDate = changedUpdatedAt
-
-            containerLayout.addView(dateTextView)
-            containerLayout.addView(recyclerView)
-        }
-    }
 
     private fun fetchTodoItems() {
         todoViewModel.fetchTodoItems(currentPage) { success ->
@@ -251,20 +216,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             } else {
                 observeTodoItems(todoItems, true)
             }
-        }
-    }
-
-    private fun fetchTodoSearchItems(query: String? = null) {
-        if (query?.isNotEmpty() == true) {
-            searchViewModel.fetchTodoSearchItem(query)
-            searchViewModel.todoItem.observe(this) { todoItems ->
-                observeTodoSearchItem(todoItems)
-            }
-            searchViewModel.toastMessage.observe(this) { message ->
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            Toast.makeText(requireContext(), "입력을 해주세요!!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -298,5 +249,4 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             }
         }
     }
-
 }
