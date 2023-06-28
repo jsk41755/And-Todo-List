@@ -97,6 +97,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
 
         binding.CompleteBtn.setOnClickListener {
             hideCompleted = !hideCompleted
+            if(!hideCompleted){
+                binding.CompleteBtn.text = "완료 숨기기"
+            } else {
+                binding.CompleteBtn.text = "전체 보기"
+            }
             beforeDate = ""
             var tempPage = currentPage
             currentPage = 1
