@@ -8,9 +8,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.SearchView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.SearchView
+import androidx.core.os.bundleOf
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -25,6 +26,8 @@ import com.devjeong.todolist_study.view.custom_dialog.CustomDialogInterface
 import com.devjeong.todolist_study.view.custom_dialog.ui.CustomDialog
 import com.devjeong.todolist_study.viewModel.TodoListViewModel
 import com.devjeong.todolist_study.viewModel.TodoViewModel
+import com.devjeong.todolist_study.R
+import androidx.navigation.fragment.findNavController
 
 class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private lateinit var todoViewModel: TodoListViewModel
@@ -88,7 +91,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         binding.addDialogBtn.setOnClickListener {
             val customDialog = CustomDialog(this@HomeFragment, object : CustomDialogInterface {
                 override fun onAddButtonClicked() {
-                    // Add 버튼이 클릭되었을 때의 동작 처리
                     currentPage = 1
                     fetchTodoItems()
                 }
@@ -102,17 +104,20 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             fetchTodoItems()
         }
 
-        /*binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                val title = query?.trim()
-                fetchTodoSearchItems(title)
+        binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                val action = HomeFragmentDirections.actionHomeFragmentToSearchFragment(query)
+                findNavController().navigate(action)
+
                 return true
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
                 return true
             }
-        })*/
+        })
+
+
     }
 
     private fun createGroupRecyclerView(date: String, items: MutableList<TodoItem>) {
