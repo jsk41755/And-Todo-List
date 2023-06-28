@@ -2,6 +2,7 @@ package com.devjeong.todolist_study.view.custom_dialog.ui
 
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.Window
 import android.view.WindowManager
 import android.widget.Button
@@ -9,6 +10,7 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
 import com.devjeong.todolist_study.BaseFragment
+import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.Model.TodoItemDTO
 import com.devjeong.todolist_study.R
 import com.devjeong.todolist_study.view.MainActivity
@@ -25,6 +27,10 @@ class CustomDialog(
     private lateinit var todoSwitch : Switch
 
     private lateinit var todoViewModel: TodoListViewModel
+
+    private var itemId: Int = 0
+    private var itemTitle: String = ""
+    private var itemIsDone: Boolean = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -45,11 +51,29 @@ class CustomDialog(
         todoSwitch = findViewById(R.id.isDoneSwitch)
 
         addButton.setOnClickListener {
-            dialogInterface.onAddButtonClicked()
-            val todoItem = TodoItemDTO(todoTitle.text.toString(), todoSwitch.isChecked)
+            if (itemId != 0) {
+                itemTitle = todoTitle.text.toString()
+                itemIsDone = todoSwitch.isChecked
+                val todoItem = TodoItem(itemId, itemTitle, itemIsDone, "", "")
+                Log.d("수정 완료", todoItem.toString())
+                todoViewModel.updateTodoItem(todoItem)
+            } else {
+                val todoItem = TodoItemDTO(todoTitle.text.toString(), todoSwitch.isChecked)
+                Log.d("추가 완료", "${todoTitle.text}, ${todoSwitch.isChecked}")
+                todoViewModel.addTodoItem(todoItem)
+            }
 
-            todoViewModel.addTodoItem(todoItem)
+            dialogInterface.onAddButtonClicked()
             dismiss()
         }
+    }
+
+    fun setData(id: Int, title: String, isDone: Boolean) {
+        itemId = id
+        itemTitle = title
+        itemIsDone = isDone
+
+        todoTitle.text = title
+        todoSwitch.isChecked = isDone
     }
 }

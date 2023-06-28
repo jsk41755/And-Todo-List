@@ -1,6 +1,7 @@
 package com.devjeong.todolist_study.Adapter
 
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,6 +28,7 @@ class TodoItemAdapter(
     }
     private var listener : OnItemClickListener? = null
     fun setOnItemClickListener(listener : OnItemClickListener) {
+        Log.d("isClicked", date)
         this.listener = listener
     }
 
@@ -91,4 +93,3 @@ class TodoItemAdapter(
         }
     }
 }
-

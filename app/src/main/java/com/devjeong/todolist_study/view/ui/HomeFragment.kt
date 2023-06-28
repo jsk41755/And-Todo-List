@@ -71,7 +71,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         todoViewModel.deleteResult.observe(viewLifecycleOwner) { result ->
             if (result) {
                 fetchTodoItems()
-                Log.d("TodoViewModel", "삭제 성공")
             } else {
                 // 삭제 실패 처리
             }
@@ -114,22 +113,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                 return true
             }
         })*/
-
-        adapter.setOnItemClickListener(object :
-            TodoItemAdapter.OnItemClickListener {
-            override fun onItemClick(v: View, data: TodoItem, pos: Int) {
-                Log.d("isClicked", currentPage.toString())
-                val customDialog = CustomDialog(this@HomeFragment, object : CustomDialogInterface {
-                    override fun onAddButtonClicked() {
-                        // Add 버튼이 클릭되었을 때의 동작 처리
-                        currentPage = 1
-                        fetchTodoItems()
-
-                    }
-                })
-                customDialog.show()
-            }
-        })
     }
 
     private fun createGroupRecyclerView(date: String, items: MutableList<TodoItem>) {
@@ -140,6 +123,21 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             deleteTodoItem(todoItem)
         }, updateItemCallback = { todoItem ->
             updateTodoItem(todoItem)
+        })
+
+        groupAdapter.setOnItemClickListener(object : TodoItemAdapter.OnItemClickListener {
+            override fun onItemClick(v: View, data: TodoItem, pos: Int) {
+                Log.d("isClicked", currentPage.toString())
+                val customDialog = CustomDialog(this@HomeFragment, object : CustomDialogInterface {
+                    override fun onAddButtonClicked() {
+                        // Add 버튼이 클릭되었을 때의 동작 처리
+                        currentPage = 1
+                        fetchTodoItems()
+                    }
+                })
+                customDialog.show()
+                customDialog.setData(data.id, data.title, data.is_done)
+            }
         })
 
         recyclerView.adapter = groupAdapter

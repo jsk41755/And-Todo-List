@@ -9,6 +9,7 @@ import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.Model.TodoItemDTO
 import com.devjeong.todolist_study.retrofit.ApiService
 import com.devjeong.todolist_study.retrofit.RetrofitClient
+import com.devjeong.todolist_study.view.ui.HomeFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,6 +21,9 @@ class TodoListViewModel : ViewModel() {
 
     private val _deleteResult = MutableLiveData<Boolean>()
     val deleteResult: LiveData<Boolean> get() = _deleteResult
+
+    private val _error = MutableLiveData<String>()
+    val error: LiveData<String> = _error
     fun fetchTodoItems(page: Int, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
             try {
@@ -76,7 +80,9 @@ class TodoListViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     Log.d("TodoViewModel", "API 호출 성공")
                 } else {
-                    Log.d("TodoViewModel", "API 호출 실패")
+                    val errorBody = response.errorBody()?.string()
+                    val decodedMessage = decodeUnicodeEscapeSequence(errorBody.toString())
+                    Log.d("TodoViewModel", "API 호출 실패, 오류 메시지: $decodedMessage")
                 }
             } catch (e: IOException) {
                 Log.e("TodoViewModel", "API 호출 실패: ${e.message}")
@@ -100,10 +106,22 @@ class TodoListViewModel : ViewModel() {
 
                     }
                 } else {
-                    Log.d("TodoViewModel", "API 호출 실패")
+                    Log.d("TodoViewModel", "API 호출 실패, ${response.message()}")
                 }
             } catch (e: IOException) {
                 Log.e("TodoViewModel", "API 호출 실패: ${e.message}")
+            }
+        }
+    }
+
+    private fun decodeUnicodeEscapeSequence(input: String): String {
+        return input.replace("\\\\u([0-9a-fA-F]{4})".toRegex()) { matchResult ->
+            val hexCode = matchResult.groupValues[1]
+            try {
+                val unicodeValue = hexCode.toInt(16)
+                unicodeValue.toChar().toString()
+            } catch (e: NumberFormatException) {
+                matchResult.value // 유효하지 않은 유니코드 이스케이프 시퀀스는 그대로 유지
             }
         }
     }
