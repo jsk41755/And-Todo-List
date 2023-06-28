@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TodoList_Study</string>
+    <string name="app_name">투두리스트</string>
     <string name="todo_content">Lorem ipsum dolor sit amet, consectetur adipiscing elit</string>
     <string name="todo_time">12:42 PM</string>
     <string name="submit">추가하기</string>

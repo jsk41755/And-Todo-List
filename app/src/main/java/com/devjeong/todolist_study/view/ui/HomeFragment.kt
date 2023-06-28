@@ -80,7 +80,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         scrollView = binding.scrollView
 
         todoViewModel.deleteResult.observe(viewLifecycleOwner) { _ ->
-            fetchTodoItems { success ->
+            fetchTodoItems { _ ->
                 customProgressDialog.dismiss()
             }
         }
