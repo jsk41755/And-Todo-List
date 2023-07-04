@@ -1,6 +1,5 @@
 package com.devjeong.todolist_study.Adapter
 
-import android.content.Intent
 import android.graphics.Paint
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,12 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.R
-import com.devjeong.todolist_study.view.custom_dialog.ui.CustomDialog
+import com.google.android.material.snackbar.Snackbar
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -84,7 +82,11 @@ class TodoItemAdapter(
 
             removeTxt.setOnClickListener {
                 removeData(this.layoutPosition)
-                Toast.makeText(itemView.context, "삭제완료!", Toast.LENGTH_SHORT).show()
+                val snackBar= Snackbar.make(it, "삭제완료!", Snackbar.LENGTH_SHORT)
+                snackBar.setAction("확인"){
+                    //복원 기능을 넣어야 하나 고민
+                }
+                snackBar.show()
             }
 
             isDoneCheckBox.setOnCheckedChangeListener(null)

@@ -9,7 +9,6 @@ import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.Model.TodoItemDTO
 import com.devjeong.todolist_study.retrofit.ApiService
 import com.devjeong.todolist_study.retrofit.RetrofitClient
-import com.devjeong.todolist_study.view.ui.HomeFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -22,8 +21,8 @@ class TodoListViewModel : ViewModel() {
     private val _deleteResult = MutableLiveData<Boolean>()
     val deleteResult: LiveData<Boolean> get() = _deleteResult
 
-    private val _toastMessage = MutableLiveData<String>()
-    val toastMessage: LiveData<String> get() = _toastMessage
+    private val _snackMessage = MutableLiveData<String>()
+    val snackMessage: LiveData<String> get() = _snackMessage
     fun fetchTodoItems(page: Int, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
             try {
@@ -40,7 +39,7 @@ class TodoListViewModel : ViewModel() {
                         callback(true)
                     }
                     if(response.code() == 204){
-                        _toastMessage.value = "마지막 페이지 입니다."
+                        _snackMessage.value = "마지막 페이지 입니다."
                     }
                 } else {
                     Log.d("TodoViewModel", "API 호출 실패")
@@ -86,7 +85,7 @@ class TodoListViewModel : ViewModel() {
                     val errorBody = response.errorBody()?.string()
                     val decodedMessage = decodeUnicodeEscapeSequence(errorBody.toString())
                     Log.d("TodoViewModel", "API 호출 실패, 오류 메시지: $decodedMessage")
-                    _toastMessage.value = decodedMessage
+                    _snackMessage.value = decodedMessage
                 }
             } catch (e: IOException) {
                 Log.e("TodoViewModel", "API 호출 실패: ${e.message}")

@@ -13,7 +13,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.ViewModelProvider
@@ -30,6 +29,7 @@ import com.devjeong.todolist_study.TodoListItemHelper
 import com.devjeong.todolist_study.databinding.FragmentSearchBinding
 import com.devjeong.todolist_study.viewModel.TodoListViewModel
 import com.devjeong.todolist_study.viewModel.TodoSearchViewModel
+import com.google.android.material.snackbar.Snackbar
 
 class SearchFragment : BaseFragment<FragmentSearchBinding>() {
     private var query: String? = null
@@ -109,8 +109,9 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
             }
         }
 
-        searchViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        searchViewModel.snackMessage.observe(viewLifecycleOwner) { message ->
+            //Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+            Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show()
         }
     }
 

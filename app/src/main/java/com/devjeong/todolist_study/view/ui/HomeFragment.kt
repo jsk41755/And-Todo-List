@@ -9,8 +9,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
@@ -28,9 +28,7 @@ import com.devjeong.todolist_study.view.custom_dialog.ui.CustomDialog
 import com.devjeong.todolist_study.viewModel.TodoListViewModel
 import com.devjeong.todolist_study.R
 import com.devjeong.todolist_study.view.custom_dialog.ui.ProgressDialog
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.google.android.material.snackbar.Snackbar
 
 class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private lateinit var todoViewModel: TodoListViewModel
@@ -85,8 +83,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
             }
         }
 
-        todoViewModel.toastMessage.observe(viewLifecycleOwner) { message ->
-            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+        todoViewModel.snackMessage.observe(viewLifecycleOwner) { message ->
+            Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show()
         }
 
         setupScrollListener()
@@ -218,6 +216,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         }
     }
     private fun observeTodoItems(todoItems: List<TodoItem>, isNewData: Boolean) {
+        binding.progressBar.visibility = View.VISIBLE
+
         filteredItems = if (hideCompleted) {
             todoItems.filter { !it.is_done }
         } else {
@@ -282,11 +282,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                     val todoItems = todoViewModel.todoItems.value ?: emptyList()
                     if (currentPage > 1) {
                         observeTodoItems(todoItems, false)
+                        binding.progressBar.visibility = View.INVISIBLE
                     } else {
                         observeTodoItems(todoItems, true)
                     }
                 }
             }
+
         }
     }
 }

@@ -17,8 +17,8 @@ class TodoSearchViewModel : ViewModel() {
     private val _todoItem = MutableLiveData<List<TodoItem>>()
     val todoItem: LiveData<List<TodoItem>> get() = _todoItem
 
-    private val _toastMessage = MutableLiveData<String>()
-    val toastMessage: LiveData<String> get() = _toastMessage
+    private val _snackMessage = MutableLiveData<String>()
+    val snackMessage: LiveData<String> get() = _snackMessage
 
     fun fetchTodoSearchItem(query: String, page: Int, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
@@ -35,7 +35,7 @@ class TodoSearchViewModel : ViewModel() {
                         callback(true)
                     }
                     if(response.code() == 204){
-                        _toastMessage.value = todoResponse?.message
+                        _snackMessage.value = todoResponse?.message
                     }
                 } else {
                     Log.d("TodoViewModel", "API 호출 실패")
