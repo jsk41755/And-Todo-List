@@ -16,6 +16,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -30,6 +31,8 @@ import com.devjeong.todolist_study.databinding.FragmentSearchBinding
 import com.devjeong.todolist_study.viewModel.TodoListViewModel
 import com.devjeong.todolist_study.viewModel.TodoSearchViewModel
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class SearchFragment : BaseFragment<FragmentSearchBinding>() {
     private var query: String? = null
@@ -87,9 +90,9 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         containerLayout = binding.containerLayout
         scrollView = binding.scrollView
 
-        todoViewModel.deleteResult.observe(viewLifecycleOwner) { _ ->
+        todoViewModel.deleteResult.onEach {
             fetchTodoSearchItems(query!!)
-        }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         fetchTodoSearchItems(query!!)
         setupScrollListener()
@@ -108,11 +111,11 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
                 fetchTodoSearchItems(query!!)
             }
         }
-
-        searchViewModel.snackMessage.observe(viewLifecycleOwner) { message ->
-            //Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-            Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show()
-        }
+        searchViewModel.snackMessage.onEach {message ->
+            if (message != null) {
+                Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show()
+            }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     private fun getFormattedSearchTitle(query: String): SpannableString {

@@ -10,19 +10,21 @@ import com.devjeong.todolist_study.Model.TodoItemDTO
 import com.devjeong.todolist_study.retrofit.ApiService
 import com.devjeong.todolist_study.retrofit.RetrofitClient
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class TodoListViewModel : ViewModel() {
-    private val _todoItems = MutableLiveData<List<TodoItem>>()
-    val todoItems: LiveData<List<TodoItem>> get() = _todoItems
+    private val _todoItems = MutableStateFlow<List<TodoItem>>(emptyList())
+    val todoItems: StateFlow<List<TodoItem>> get() = _todoItems
 
-    private val _deleteResult = MutableLiveData<Boolean>()
-    val deleteResult: LiveData<Boolean> get() = _deleteResult
+    private val _deleteResult = MutableStateFlow(false)
+    val deleteResult: StateFlow<Boolean> get() = _deleteResult
 
-    private val _snackMessage = MutableLiveData<String>()
-    val snackMessage: LiveData<String> get() = _snackMessage
+    private val _snackMessage = MutableStateFlow("")
+    val snackMessage: StateFlow<String> get() = _snackMessage
     fun fetchTodoItems(page: Int, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
             try {
@@ -35,11 +37,11 @@ class TodoListViewModel : ViewModel() {
                     val todoResponse = response.body()
                     if (todoResponse != null) {
                         val todoItems = todoResponse.data
-                        _todoItems.value = todoItems
+                        _todoItems.emit(todoItems)
                         callback(true)
                     }
                     if(response.code() == 204){
-                        _snackMessage.value = "마지막 페이지 입니다."
+                        _snackMessage.emit("마지막 페이지 입니다.")
                     }
                 } else {
                     Log.d("TodoViewModel", "API 호출 실패")
@@ -59,14 +61,14 @@ class TodoListViewModel : ViewModel() {
                     retrofit.deleteTodoItem(todoId).execute()
                 }
                 if (response.isSuccessful) {
-                    _deleteResult.value = true
+                    _deleteResult.emit(true)
                     Log.d("TodoViewModel", "삭제 성공")
                 } else {
-                    _deleteResult.value = false
+                    _deleteResult.emit(false)
                     Log.d("TodoViewModel", "삭제 실패")
                 }
             } catch (e: IOException) {
-                _deleteResult.value = false
+                _deleteResult.emit(false)
                 Log.e("TodoViewModel", "삭제 실패: ${e.message}")
             }
         }
@@ -85,7 +87,7 @@ class TodoListViewModel : ViewModel() {
                     val errorBody = response.errorBody()?.string()
                     val decodedMessage = decodeUnicodeEscapeSequence(errorBody.toString())
                     Log.d("TodoViewModel", "API 호출 실패, 오류 메시지: $decodedMessage")
-                    _snackMessage.value = decodedMessage
+                    _snackMessage.emit(decodedMessage)
                 }
             } catch (e: IOException) {
                 Log.e("TodoViewModel", "API 호출 실패: ${e.message}")

@@ -15,6 +15,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,6 +30,11 @@ import com.devjeong.todolist_study.viewModel.TodoListViewModel
 import com.devjeong.todolist_study.R
 import com.devjeong.todolist_study.view.custom_dialog.ui.ProgressDialog
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     private lateinit var todoViewModel: TodoListViewModel
@@ -77,15 +83,17 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         containerLayout = binding.containerLayout
         scrollView = binding.scrollView
 
-        todoViewModel.deleteResult.observe(viewLifecycleOwner) { _ ->
-            fetchTodoItems { _ ->
+        todoViewModel.deleteResult.onEach { _ ->
+            fetchTodoItems {
                 customProgressDialog.dismiss()
             }
-        }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
 
-        todoViewModel.snackMessage.observe(viewLifecycleOwner) { message ->
+        todoViewModel.snackMessage
+            .filter { message -> message.isNotBlank() }
+            .onEach {message ->
             Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show()
-        }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         setupScrollListener()
 
@@ -249,14 +257,16 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
     }
 
     private fun fetchTodoItems(completion: (Boolean) -> Unit) {
-        todoViewModel.fetchTodoItems(currentPage) { success ->
-            val todoItems = todoViewModel.todoItems.value ?: emptyList()
-            if (currentPage > 1) {
-                observeTodoItems(todoItems, false)
-            } else {
-                observeTodoItems(todoItems, true)
+        viewLifecycleOwner.lifecycleScope.launch {
+            todoViewModel.fetchTodoItems(currentPage) { success ->
+                val todoItems = todoViewModel.todoItems.value ?: emptyList()
+                if (currentPage > 1) {
+                    observeTodoItems(todoItems, false)
+                } else {
+                    observeTodoItems(todoItems, true)
+                }
+                completion(success)
             }
-            completion(success)
         }
     }
 
@@ -288,7 +298,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                     }
                 }
             }
-
         }
     }
 }

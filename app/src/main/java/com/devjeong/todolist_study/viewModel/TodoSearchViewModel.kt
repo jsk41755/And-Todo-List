@@ -9,16 +9,18 @@ import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.retrofit.ApiService
 import com.devjeong.todolist_study.retrofit.RetrofitClient
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class TodoSearchViewModel : ViewModel() {
-    private val _todoItem = MutableLiveData<List<TodoItem>>()
-    val todoItem: LiveData<List<TodoItem>> get() = _todoItem
+    private val _todoItem = MutableStateFlow<List<TodoItem>>(emptyList())
+    val todoItem: StateFlow<List<TodoItem>> get() = _todoItem
 
-    private val _snackMessage = MutableLiveData<String>()
-    val snackMessage: LiveData<String> get() = _snackMessage
+    private val _snackMessage = MutableStateFlow<String?>(null)
+    val snackMessage: StateFlow<String?> get() = _snackMessage
 
     fun fetchTodoSearchItem(query: String, page: Int, callback: (Boolean) -> Unit) {
         viewModelScope.launch {
@@ -31,11 +33,11 @@ class TodoSearchViewModel : ViewModel() {
                     val todoResponse = response.body()
                     if (todoResponse != null) {
                         val todoItems = todoResponse.data
-                        _todoItem.value = todoItems
+                        _todoItem.emit(todoItems)
                         callback(true)
                     }
                     if(response.code() == 204){
-                        _snackMessage.value = todoResponse?.message
+                        _snackMessage.emit(todoResponse?.message)
                     }
                 } else {
                     Log.d("TodoViewModel", "API 호출 실패")

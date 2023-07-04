@@ -13,12 +13,14 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.devjeong.todolist_study.Model.TodoItem
 import com.devjeong.todolist_study.Model.TodoItemDTO
 import com.devjeong.todolist_study.R
 import com.devjeong.todolist_study.view.custom_dialog.CustomDialogInterface
 import com.devjeong.todolist_study.view.ui.HomeFragment
 import com.devjeong.todolist_study.viewModel.TodoListViewModel
+import kotlinx.coroutines.flow.collect
 
 class CustomDialog(
     private val fragment: HomeFragment,
@@ -71,9 +73,11 @@ class CustomDialog(
                 Log.d("추가 완료", "${todoTitle.text}, ${todoSwitch.isChecked}")
                 todoViewModel.addTodoItem(todoItem)
 
-                todoViewModel.snackMessage.observe(this) { message ->
-                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                    Log.d("TodoViewModel", message.toString())
+                lifecycleScope.launchWhenStarted {
+                    todoViewModel.snackMessage.collect{message ->
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        Log.d("TodoViewModel", message.toString())
+                    }
                 }
 
                 if(todoTitle.text.toString().length >= 6){
