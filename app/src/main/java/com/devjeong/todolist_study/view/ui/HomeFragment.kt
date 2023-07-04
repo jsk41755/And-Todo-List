@@ -224,8 +224,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
         }
     }
     private fun observeTodoItems(todoItems: List<TodoItem>, isNewData: Boolean) {
-        binding.progressBar.visibility = View.VISIBLE
-
         filteredItems = if (hideCompleted) {
             todoItems.filter { !it.is_done }
         } else {
@@ -291,6 +289,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding>() {
                     // 새로운 아이템을 가져와서 기존 groupRecyclerView에 추가
                     val todoItems = todoViewModel.todoItems.value ?: emptyList()
                     if (currentPage > 1) {
+                        binding.progressBar.visibility = View.VISIBLE
                         observeTodoItems(todoItems, false)
                         binding.progressBar.visibility = View.INVISIBLE
                     } else {
